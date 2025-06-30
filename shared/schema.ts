@@ -33,7 +33,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role", { enum: ["admin", "collaborator"] }).notNull().default("collaborator"),
+  role: varchar("role", { enum: ["admin", "project_manager", "senior_architect", "junior_architect", "budget_specialist", "collaborator"] }).notNull().default("collaborator"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -44,10 +44,20 @@ export const projects = pgTable("projects", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   status: varchar("status", { enum: ["active", "completed", "on_hold", "cancelled"] }).notNull().default("active"),
+  type: varchar("type", { enum: ["stand_imobiliario", "projeto_arquitetonico", "projeto_estrutural", "reforma", "manutencao"] }).notNull().default("stand_imobiliario"),
+  stage: varchar("stage", { enum: ["briefing", "conceito", "projeto", "aprovacao", "orcamento", "producao", "entrega"] }).notNull().default("briefing"),
+  priority: varchar("priority", { enum: ["baixa", "media", "alta", "urgente"] }).notNull().default("media"),
   startDate: date("start_date"),
   endDate: date("end_date"),
   clientName: varchar("client_name", { length: 255 }),
+  clientEmail: varchar("client_email", { length: 255 }),
+  clientPhone: varchar("client_phone", { length: 50 }),
   budget: decimal("budget", { precision: 12, scale: 2 }),
+  estimatedHours: decimal("estimated_hours", { precision: 7, scale: 2 }),
+  actualHours: decimal("actual_hours", { precision: 7, scale: 2 }).default('0'),
+  location: varchar("location", { length: 255 }),
+  area: varchar("area", { length: 100 }), // square meters
+  managerUserId: varchar("manager_user_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -121,6 +131,30 @@ export const timeEntries = pgTable("time_entries", {
   description: text("description"),
   isActive: boolean("is_active").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const projectTeams = pgTable("project_teams", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  role: varchar("role", { length: 100 }).notNull(), // architect, engineer, project_manager, etc.
+  permissions: varchar("permissions", { length: 50 }).default("read"), // read, write, admin
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const portfolioItems = pgTable("portfolio_items", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { enum: ["obras", "projetos"] }).notNull().default("projetos"),
+  featuredImage: varchar("featured_image", { length: 500 }),
+  images: text("images").array(), // JSON array of image URLs
+  isPublished: boolean("is_published").notNull().default(false),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Relations

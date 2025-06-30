@@ -14,7 +14,29 @@ export const TASK_PRIORITY = {
 
 export const USER_ROLES = {
   ADMIN: 'admin',
+  PROJECT_MANAGER: 'project_manager',
+  SENIOR_ARCHITECT: 'senior_architect', 
+  JUNIOR_ARCHITECT: 'junior_architect',
+  BUDGET_SPECIALIST: 'budget_specialist',
   COLLABORATOR: 'collaborator',
+} as const;
+
+export const PROJECT_TYPES = {
+  STAND_IMOBILIARIO: 'stand_imobiliario',
+  PROJETO_ARQUITETONICO: 'projeto_arquitetonico',
+  PROJETO_ESTRUTURAL: 'projeto_estrutural',
+  REFORMA: 'reforma',
+  MANUTENCAO: 'manutencao',
+} as const;
+
+export const PROJECT_STAGES = {
+  BRIEFING: 'briefing',
+  CONCEITO: 'conceito', 
+  PROJETO: 'projeto',
+  APROVACAO: 'aprovacao',
+  ORCAMENTO: 'orcamento',
+  PRODUCAO: 'producao',
+  ENTREGA: 'entrega',
 } as const;
 
 export const PROJECT_STATUS = {

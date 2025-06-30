@@ -9,6 +9,7 @@ import CalendarView from "@/components/Calendar/CalendarView";
 import FileManager from "@/components/Files/FileManager";
 import AIChat from "@/components/Chat/AIChat";
 import UserManagement from "@/components/Users/UserManagement";
+import HeroSection from "@/components/Dashboard/HeroSection";
 import { useWebSocket } from "@/hooks/useWebSocket";
 
 type Section = 'dashboard' | 'kanban' | 'calendar' | 'files' | 'chat' | 'users';
@@ -51,7 +52,12 @@ export default function Home() {
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'dashboard':
-        return <Dashboard />;
+        return (
+          <div>
+            <HeroSection />
+            <Dashboard />
+          </div>
+        );
       case 'kanban':
         return <KanbanBoard />;
       case 'calendar':
@@ -61,9 +67,19 @@ export default function Home() {
       case 'chat':
         return <AIChat />;
       case 'users':
-        return user.role === 'admin' ? <UserManagement /> : <Dashboard />;
+        return user.role === 'admin' ? <UserManagement /> : (
+          <div>
+            <HeroSection />
+            <Dashboard />
+          </div>
+        );
       default:
-        return <Dashboard />;
+        return (
+          <div>
+            <HeroSection />
+            <Dashboard />
+          </div>
+        );
     }
   };
 
