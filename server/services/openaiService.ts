@@ -2,9 +2,16 @@ import OpenAI from "openai";
 import type { TaskWithDetails } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY 
-});
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI | null {
+  if (!openai && (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY)) {
+    openai = new OpenAI({ 
+      apiKey: process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY 
+    });
+  }
+  return openai;
+}
 
 class OpenAIService {
   async findTasksWithAI(query: string, tasks: TaskWithDetails[]): Promise<TaskWithDetails[]> {
@@ -39,7 +46,13 @@ class OpenAIService {
         "${query}"
       `;
 
-      const response = await openai.chat.completions.create({
+      const client = getOpenAIClient();
+      if (!client) {
+        console.warn("OpenAI API key not configured, falling back to basic search");
+        return this.basicSearch(query, tasks);
+      }
+
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [
           { role: "system", content: systemInstruction },
@@ -103,7 +116,18 @@ class OpenAIService {
         ];
       }
 
-      const response = await openai.chat.completions.create({
+      const client = getOpenAIClient();
+      if (!client) {
+        return [
+          "Revisar plantas baixas",
+          "Criar modelo 3D",
+          "Preparar documentação",
+          "Verificar especificações técnicas",
+          "Coordenar com equipe"
+        ];
+      }
+
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [{
           role: "user",
@@ -140,7 +164,12 @@ class OpenAIService {
         return this.basicProjectAnalysis(tasks);
       }
 
-      const response = await openai.chat.completions.create({
+      const client = getOpenAIClient();
+      if (!client) {
+        return this.basicProjectAnalysis(tasks);
+      }
+
+      const response = await client.chat.completions.create({
         model: "gpt-4o",
         messages: [{
           role: "system",
