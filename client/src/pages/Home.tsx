@@ -9,12 +9,13 @@ import CalendarView from "@/components/Calendar/CalendarView";
 import FileManager from "@/components/Files/FileManager";
 import AIChat from "@/components/Chat/AIChat";
 import UserManagement from "@/components/Users/UserManagement";
+import ProjectManagement from "@/components/Projects/ProjectManagement";
 
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
 import type { User } from "@shared/schema";
 
-type Section = 'dashboard' | 'kanban' | 'calendar' | 'files' | 'chat' | 'users';
+type Section = 'dashboard' | 'kanban' | 'projects' | 'calendar' | 'files' | 'chat' | 'users';
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -60,6 +61,8 @@ export default function Home() {
         return <Dashboard />;
       case 'kanban':
         return <KanbanBoard />;
+      case 'projects':
+        return <ProjectManagement />;
       case 'calendar':
         return <CalendarView />;
       case 'files':

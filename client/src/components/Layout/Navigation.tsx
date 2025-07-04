@@ -8,6 +8,7 @@ export default function Navigation({ activeSection, onSectionChange, userRole }:
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-line' },
     { id: 'kanban', label: 'Kanban', icon: 'fas fa-columns' },
+    { id: 'projects', label: 'Projetos', icon: 'fas fa-building' },
     { id: 'calendar', label: 'Calendário', icon: 'fas fa-calendar' },
     { id: 'files', label: 'Arquivos', icon: 'fas fa-folder' },
     { id: 'chat', label: 'IA Chat', icon: 'fas fa-robot' },

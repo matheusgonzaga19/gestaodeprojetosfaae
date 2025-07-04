@@ -22,16 +22,9 @@ const upload = multer({
   },
 });
 
-interface AuthenticatedRequest extends Request {
-  user: {
-    claims: {
-      sub: string;
-      email?: string;
-      first_name?: string;
-      last_name?: string;
-      profile_image_url?: string;
-    };
-  };
+// Helper function to get user ID from request
+function getUserId(req: Request): string {
+  return (req.user as any).claims.sub;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -42,9 +35,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wsConnections = new Map<string, WebSocket>();
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -57,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get('/api/dashboard/stats', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/dashboard/stats', isAuthenticated, async (req, res) => {
     try {
       const stats = await storage.getDashboardStats();
       res.json(stats);
@@ -67,9 +60,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/dashboard/user-stats', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/dashboard/user-stats', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const stats = await storage.getUserStats(userId);
       res.json(stats);
     } catch (error) {
@@ -89,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/projects', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/projects', isAuthenticated, async (req, res) => {
     try {
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validatedData);
@@ -130,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Task routes
-  app.get('/api/tasks', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/tasks', isAuthenticated, async (req, res) => {
     try {
       const { userId, projectId } = req.query;
       let tasks;
@@ -150,9 +143,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/tasks', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/tasks', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const validatedData = insertTaskSchema.parse({
         ...req.body,
         createdUserId: userId,
@@ -206,10 +199,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/tasks/:id', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.put('/api/tasks/:id', isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const originalTask = await storage.getTaskById(id);
       
       if (!originalTask) {
@@ -260,10 +253,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Task comments
-  app.post('/api/tasks/:id/comments', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/tasks/:id/comments', isAuthenticated, async (req, res) => {
     try {
       const taskId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       
       const validatedData = insertTaskCommentSchema.parse({
         taskId,
@@ -295,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat routes
-  app.post('/api/chat/search', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/chat/search', isAuthenticated, async (req, res) => {
     try {
       const { query } = req.body;
       
@@ -317,13 +310,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // File upload routes
-  app.post('/api/files/upload', isAuthenticated, upload.single('file'), async (req: AuthenticatedRequest, res) => {
+  app.post('/api/files/upload', isAuthenticated, upload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { taskId, projectId } = req.body;
 
       const savedFile = await fileService.saveFile(req.file, {
@@ -376,9 +369,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management routes (Admin only)
-  app.get('/api/users', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/users', isAuthenticated, async (req, res) => {
     try {
-      const currentUser = await storage.getUser(req.user.claims.sub);
+      const currentUser = await storage.getUser(getUserId(req));
       if (!currentUser || currentUser.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -391,9 +384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/users/:id/role', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.put('/api/users/:id/role', isAuthenticated, async (req, res) => {
     try {
-      const currentUser = await storage.getUser(req.user.claims.sub);
+      const currentUser = await storage.getUser(getUserId(req));
       if (!currentUser || currentUser.role !== 'admin') {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -414,10 +407,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Set initial user type (for new users after login)
-  app.post('/api/auth/set-initial-type', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/auth/set-initial-type', isAuthenticated, async (req, res) => {
     try {
       const { userType } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       
       // For now, allow setting type regardless of existing role (for demo purposes)
       if (!['admin', 'collaborator'].includes(userType)) {
@@ -433,9 +426,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Notification routes
-  app.get('/api/notifications', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/notifications', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const notifications = await storage.getUserNotifications(userId);
       res.json(notifications);
     } catch (error) {
@@ -456,9 +449,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Time tracking routes
-  app.post('/api/time/start', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/time/start', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { taskId, description } = req.body;
 
       // End any active time entries first
@@ -482,9 +475,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/time/stop', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.post('/api/time/stop', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const activeEntry = await storage.getActiveTimeEntry(userId);
       
       if (!activeEntry) {
@@ -502,9 +495,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/time/active', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+  app.get('/api/time/active', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const activeEntry = await storage.getActiveTimeEntry(userId);
       res.json(activeEntry || null);
     } catch (error) {

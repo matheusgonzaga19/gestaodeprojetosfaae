@@ -171,8 +171,8 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
 
     const taskData = {
       ...formData,
-      projectId: formData.projectId ? parseInt(formData.projectId) : null,
-      assignedUserId: formData.assignedUserId || user?.id || null,
+      projectId: formData.projectId && formData.projectId !== "none" ? parseInt(formData.projectId) : null,
+      assignedUserId: formData.assignedUserId && formData.assignedUserId !== "none" ? formData.assignedUserId : user?.id || null,
       estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : null,
       dueDate: formData.dueDate || null,
     };
@@ -294,7 +294,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
                   <SelectValue placeholder="Selecione um projeto" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum projeto</SelectItem>
+                  <SelectItem value="none">Nenhum projeto</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id.toString()}>
                       {project.name}
@@ -312,7 +312,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
                     <SelectValue placeholder="Selecione um responsável" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nenhum responsável</SelectItem>
+                    <SelectItem value="none">Nenhum responsável</SelectItem>
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         <div className="flex items-center space-x-2">
