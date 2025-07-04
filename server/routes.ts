@@ -306,6 +306,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/tasks/:id', isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userId = getUserId(req);
+      const user = await storage.getUser(userId);
+      const task = await storage.getTaskById(id);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      // Check permissions - only admin or task creator/assignee can delete
+      if (user?.role !== 'admin' && task.createdUserId !== userId && task.assignedUserId !== userId) {
+        return res.status(403).json({ message: "Permission denied" });
+      }
+
+      await storage.deleteTask(id);
+
+      // Broadcast to all connected clients
+      const message = JSON.stringify({
+        type: 'task_deleted',
+        data: { taskId: id },
+      });
+      wsConnections.forEach((ws) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(message);
+        }
+      });
+
+      res.json({ message: "Task deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
   // Task comments
   app.post('/api/tasks/:id/comments', isAuthenticated, async (req, res) => {
     try {

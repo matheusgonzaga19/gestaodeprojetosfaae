@@ -29,6 +29,12 @@ const KANBAN_COLUMNS = [
     color: "bg-green-50 dark:bg-green-900/20",
     badgeColor: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-300",
   },
+  {
+    id: "cancelada",
+    title: "Cancelada",
+    color: "bg-red-50 dark:bg-red-900/20",
+    badgeColor: "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-300",
+  },
 ];
 
 export default function KanbanBoard() {
@@ -171,7 +177,7 @@ export default function KanbanBoard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {KANBAN_COLUMNS.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           
