@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import FAAELogo from "@/components/FAAELogo";
+import UserTypeSelector from "@/components/Auth/UserTypeSelector";
 import { 
   Building, 
   Calendar, 
@@ -15,6 +17,18 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const [showUserTypeSelector, setShowUserTypeSelector] = useState(false);
+
+  const handleUserTypeSelection = (userType: 'admin' | 'collaborator') => {
+    // Store the selected user type in localStorage to be used after login
+    localStorage.setItem('selectedUserType', userType);
+    // Redirect to login
+    window.location.href = '/api/login';
+  };
+
+  if (showUserTypeSelector) {
+    return <UserTypeSelector onSelectUserType={handleUserTypeSelection} />;
+  }
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -25,7 +39,7 @@ export default function Landing() {
           <div className="flex items-center justify-between max-w-7xl mx-auto">
             <FAAELogo width={200} height={60} />
             <Button 
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setShowUserTypeSelector(true)}
               className="bg-white text-blue-600 hover:bg-blue-50"
             >
               Entrar no Sistema
@@ -55,7 +69,7 @@ export default function Landing() {
                 <div className="flex flex-col sm:flex-row gap-4 mb-8">
                   <Button 
                     size="lg"
-                    onClick={() => window.location.href = '/api/login'}
+                    onClick={() => setShowUserTypeSelector(true)}
                     className="bg-yellow-400 text-blue-900 hover:bg-yellow-300 font-semibold px-8 py-4"
                   >
                     Acessar Sistema

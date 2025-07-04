@@ -413,6 +413,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Set initial user type (for new users after login)
+  app.post('/api/auth/set-initial-type', isAuthenticated, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { userType } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // For now, allow setting type regardless of existing role (for demo purposes)
+      if (!['admin', 'collaborator'].includes(userType)) {
+        return res.status(400).json({ message: "Invalid user type" });
+      }
+
+      const user = await storage.updateUserRole(userId, userType);
+      res.json(user);
+    } catch (error) {
+      console.error("Error setting initial user type:", error);
+      res.status(500).json({ message: "Failed to set user type" });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: AuthenticatedRequest, res) => {
     try {

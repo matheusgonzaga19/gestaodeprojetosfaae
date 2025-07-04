@@ -2,15 +2,32 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { PRIORITY_COLORS, PRIORITY_LABELS } from "@/lib/constants";
-import type { TaskWithDetails } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
+import TaskModal from "./TaskModal";
+import type { TaskWithDetails } from "@shared/schema";
 
 interface TaskCardProps {
   task: TaskWithDetails;
   onDragStart: (e: React.DragEvent, taskId: number) => void;
 }
 
+const PRIORITY_COLORS = {
+  baixa: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+  media: "bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-300",
+  alta: "bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-300",
+  critica: "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-300",
+};
+
+const PRIORITY_LABELS = {
+  baixa: "Baixa",
+  media: "Média",
+  alta: "Alta",
+  critica: "Crítica",
+};
+
 export default function TaskCard({ task, onDragStart }: TaskCardProps) {
+  const { user } = useAuth();
+  
   const getUserDisplayName = () => {
     if (task.assignedUser?.firstName && task.assignedUser?.lastName) {
       return `${task.assignedUser.firstName} ${task.assignedUser.lastName}`;
@@ -45,7 +62,13 @@ export default function TaskCard({ task, onDragStart }: TaskCardProps) {
     });
   };
 
-  return (
+  const canEditTask = () => {
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+    return task.assignedUserId === user.id || task.createdUserId === user.id;
+  };
+
+  const cardContent = (
     <div
       draggable
       onDragStart={(e) => onDragStart(e, task.id)}
@@ -160,4 +183,12 @@ export default function TaskCard({ task, onDragStart }: TaskCardProps) {
       )}
     </div>
   );
+
+  if (canEditTask()) {
+    return (
+      <TaskModal task={task} trigger={cardContent} />
+    );
+  }
+
+  return cardContent;
 }

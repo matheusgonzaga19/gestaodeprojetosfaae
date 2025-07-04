@@ -11,6 +11,7 @@ import AIChat from "@/components/Chat/AIChat";
 import UserManagement from "@/components/Users/UserManagement";
 
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
 import type { User } from "@shared/schema";
 
 type Section = 'dashboard' | 'kanban' | 'calendar' | 'files' | 'chat' | 'users';
@@ -22,6 +23,9 @@ export default function Home() {
 
   // Initialize WebSocket connection
   useWebSocket();
+  
+  // Setup user type if needed
+  useUserTypeSetup();
 
   // Redirect to login if not authenticated
   useEffect(() => {

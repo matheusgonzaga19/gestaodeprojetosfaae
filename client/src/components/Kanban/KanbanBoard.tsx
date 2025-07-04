@@ -2,13 +2,37 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TaskCard from "./TaskCard";
-import { KANBAN_COLUMNS } from "@/lib/constants";
-import type { TaskWithDetails, User, Project } from "@/types";
+import TaskModal from "./TaskModal";
+import { Plus } from "lucide-react";
+import type { TaskWithDetails, User, Project } from "@shared/schema";
+
+const KANBAN_COLUMNS = [
+  {
+    id: "pendente",
+    title: "Pendente",
+    color: "bg-gray-50 dark:bg-gray-800",
+    badgeColor: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+  },
+  {
+    id: "em_andamento",
+    title: "Em Andamento",
+    color: "bg-blue-50 dark:bg-blue-900/20",
+    badgeColor: "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-300",
+  },
+  {
+    id: "concluida",
+    title: "Concluída",
+    color: "bg-green-50 dark:bg-green-900/20",
+    badgeColor: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-300",
+  },
+];
 
 export default function KanbanBoard() {
+  const { user } = useAuth();
   const { toast } = useToast();
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [selectedUser, setSelectedUser] = useState<string>("all");
@@ -134,10 +158,15 @@ export default function KanbanBoard() {
             </SelectContent>
           </Select>
 
-          <Button>
-            <i className="fas fa-plus mr-2"></i>
-            Nova Tarefa
-          </Button>
+          <TaskModal
+            trigger={
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Tarefa
+              </Button>
+            }
+            defaultStatus="pendente"
+          />
         </div>
       </div>
 
