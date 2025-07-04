@@ -1,157 +1,121 @@
-import OpenAI from "openai";
-import type { TaskWithDetails } from "@shared/schema";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-let openai: OpenAI | null = null;
+import OpenAI from 'openai';
+import { TaskWithDetails } from '@shared/schema';
 
 function getOpenAIClient(): OpenAI | null {
-  if (!openai && (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY)) {
-    openai = new OpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY 
-    });
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.warn('OpenAI API key not configured');
+    return null;
   }
-  return openai;
+  return new OpenAI({ apiKey });
 }
 
 class OpenAIService {
   async findTasksWithAI(query: string, tasks: TaskWithDetails[]): Promise<TaskWithDetails[]> {
-    try {
-      if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY && !process.env.API_KEY) {
-        console.warn("OpenAI API key not configured, falling back to basic search");
-        return this.basicSearch(query, tasks);
-      }
+    const openai = getOpenAIClient();
+    
+    if (!openai) {
+      // Fallback to basic search if OpenAI is not available
+      return this.basicSearch(query, tasks);
+    }
 
-      const systemInstruction = `
-        Você é um assistente de IA especializado em gestão de projetos arquitetônicos da empresa FAAE Projetos.
-        Sua tarefa é analisar uma consulta do usuário e encontrar as tarefas mais relevantes de uma lista fornecida.
-        
-        Analise a consulta e identifique qual(is) tarefa(s) são mais relevantes baseando-se em:
-        - Título da tarefa
-        - Descrição da tarefa
-        - Status da tarefa
-        - Prioridade
-        - Projeto relacionado
-        - Usuário responsável
-        - Datas de início e fim
-        
-        Responda APENAS com um array JSON das tarefas relevantes. Se nenhuma tarefa corresponder, retorne um array vazio [].
-        Não adicione texto de conversação, explicações ou markdown. A resposta deve ser um JSON válido.
-      `;
+    try {
+      // Create a context string from tasks
+      const taskContext = tasks.map(task => 
+        `ID: ${task.id}, Título: ${task.title}, Descrição: ${task.description || 'N/A'}, Status: ${task.status}, Prioridade: ${task.priority}, Projeto: ${task.project?.name || 'N/A'}`
+      ).join('\n');
 
       const prompt = `
-        Lista de Tarefas (JSON):
-        ${JSON.stringify(tasks, null, 2)}
-
-        Consulta do Usuário:
-        "${query}"
+        Você é um assistente especializado em gerenciamento de projetos arquitetônicos.
+        Aqui está a lista de tarefas disponíveis:
+        ${taskContext}
+        
+        Pergunta do usuário: "${query}"
+        
+        Retorne apenas os IDs das tarefas mais relevantes para a pergunta, separados por vírgula.
+        Se nenhuma tarefa for relevante, retorne "NENHUMA".
+        Considere sinônimos, contexto e relevância semântica.
       `;
 
-      const client = getOpenAIClient();
-      if (!client) {
-        console.warn("OpenAI API key not configured, falling back to basic search");
-        return this.basicSearch(query, tasks);
-      }
-
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemInstruction },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 4000,
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        max_tokens: 100,
       });
 
-      const result = response.choices[0].message.content;
-      if (!result) {
-        return this.basicSearch(query, tasks);
+      const response = completion.choices[0]?.message?.content?.trim();
+      
+      if (!response || response === 'NENHUMA') {
+        return [];
       }
 
-      try {
-        const parsedResult = JSON.parse(result);
-        
-        // Handle different response formats
-        if (Array.isArray(parsedResult)) {
-          return parsedResult;
-        } else if (parsedResult.tasks && Array.isArray(parsedResult.tasks)) {
-          return parsedResult.tasks;
-        } else if (parsedResult.results && Array.isArray(parsedResult.results)) {
-          return parsedResult.results;
-        } else {
-          return this.basicSearch(query, tasks);
-        }
-      } catch (parseError) {
-        console.error("Error parsing OpenAI response:", parseError);
-        return this.basicSearch(query, tasks);
-      }
+      const taskIds = response.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      return tasks.filter(task => taskIds.includes(task.id));
+      
     } catch (error) {
-      console.error("OpenAI API error:", error);
+      console.error('OpenAI API error:', error);
       return this.basicSearch(query, tasks);
     }
   }
 
   private basicSearch(query: string, tasks: TaskWithDetails[]): TaskWithDetails[] {
-    const searchTerm = query.toLowerCase();
+    const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
     
-    return tasks.filter(task => 
-      task.title.toLowerCase().includes(searchTerm) ||
-      task.description?.toLowerCase().includes(searchTerm) ||
-      task.project?.name.toLowerCase().includes(searchTerm) ||
-      task.assignedUser?.firstName?.toLowerCase().includes(searchTerm) ||
-      task.assignedUser?.lastName?.toLowerCase().includes(searchTerm) ||
-      task.status.toLowerCase().includes(searchTerm) ||
-      task.priority.toLowerCase().includes(searchTerm)
-    );
+    return tasks.filter(task => {
+      const searchableText = [
+        task.title,
+        task.description || '',
+        task.status,
+        task.priority,
+        task.project?.name || '',
+      ].join(' ').toLowerCase();
+      
+      return searchTerms.some(term => searchableText.includes(term));
+    });
   }
 
   async generateTaskSuggestions(projectName: string, taskCount: number = 5): Promise<string[]> {
-    try {
-      if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY && !process.env.API_KEY) {
-        return [
-          "Revisar plantas baixas",
-          "Criar modelo 3D",
-          "Preparar documentação",
-          "Verificar especificações técnicas",
-          "Coordenar com equipe"
-        ];
-      }
-
-      const client = getOpenAIClient();
-      if (!client) {
-        return [
-          "Revisar plantas baixas",
-          "Criar modelo 3D",
-          "Preparar documentação",
-          "Verificar especificações técnicas",
-          "Coordenar com equipe"
-        ];
-      }
-
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{
-          role: "user",
-          content: `Como especialista em projetos arquitetônicos, sugira ${taskCount} tarefas específicas e práticas para o projeto "${projectName}". Responda com um JSON array de strings, sem explicações adicionais.`
-        }],
-        response_format: { type: "json_object" },
-      });
-
-      const result = response.choices[0].message.content;
-      if (result) {
-        const parsed = JSON.parse(result);
-        return Array.isArray(parsed) ? parsed : parsed.suggestions || [];
-      }
-    } catch (error) {
-      console.error("Error generating task suggestions:", error);
+    const openai = getOpenAIClient();
+    
+    if (!openai) {
+      return [
+        'Definir requisitos do projeto',
+        'Criar cronograma inicial',
+        'Revisar documentação',
+        'Validar entregáveis',
+        'Preparar relatório final'
+      ];
     }
 
-    return [
-      "Revisar plantas baixas",
-      "Criar modelo 3D",
-      "Preparar documentação",
-      "Verificar especificações técnicas",
-      "Coordenar com equipe"
-    ];
+    try {
+      const prompt = `
+        Você é um especialista em gerenciamento de projetos arquitetônicos.
+        Gere ${taskCount} sugestões de tarefas para um projeto chamado "${projectName}".
+        
+        Retorne apenas uma lista de títulos de tarefas, uma por linha, sem numeração.
+        Foque em tarefas típicas de projetos arquitetônicos brasileiros.
+      `;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 200,
+      });
+
+      const response = completion.choices[0]?.message?.content?.trim();
+      
+      if (!response) {
+        return [];
+      }
+
+      return response.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+      
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      return [];
+    }
   }
 
   async analyzeProjectHealth(tasks: TaskWithDetails[]): Promise<{
@@ -159,44 +123,66 @@ class OpenAIService {
     insights: string[];
     recommendations: string[];
   }> {
-    try {
-      if (!process.env.OPENAI_API_KEY && !process.env.GEMINI_API_KEY && !process.env.API_KEY) {
-        return this.basicProjectAnalysis(tasks);
-      }
-
-      const client = getOpenAIClient();
-      if (!client) {
-        return this.basicProjectAnalysis(tasks);
-      }
-
-      const response = await client.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{
-          role: "system",
-          content: "Você é um especialista em gestão de projetos arquitetônicos. Analise as tarefas fornecidas e forneça insights sobre a saúde do projeto."
-        }, {
-          role: "user",
-          content: `Analise estas tarefas e forneça uma análise da saúde do projeto:
-          
-          ${JSON.stringify(tasks, null, 2)}
-          
-          Responda com JSON contendo:
-          - score (0-100): pontuação da saúde do projeto
-          - insights: array de observações importantes
-          - recommendations: array de recomendações para melhoria`
-        }],
-        response_format: { type: "json_object" },
-      });
-
-      const result = response.choices[0].message.content;
-      if (result) {
-        return JSON.parse(result);
-      }
-    } catch (error) {
-      console.error("Error analyzing project health:", error);
+    const openai = getOpenAIClient();
+    
+    if (!openai) {
+      return this.basicProjectAnalysis(tasks);
     }
 
-    return this.basicProjectAnalysis(tasks);
+    try {
+      const stats = {
+        total: tasks.length,
+        completed: tasks.filter(t => t.status === 'concluida').length,
+        inProgress: tasks.filter(t => t.status === 'em_andamento').length,
+        open: tasks.filter(t => t.status === 'aberta').length,
+        cancelled: tasks.filter(t => t.status === 'cancelada').length,
+        highPriority: tasks.filter(t => t.priority === 'alta' || t.priority === 'critica').length,
+        overdue: tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date()).length,
+      };
+
+      const prompt = `
+        Analise a saúde deste projeto arquitetônico com base nestas estatísticas:
+        
+        Total de tarefas: ${stats.total}
+        Concluídas: ${stats.completed}
+        Em andamento: ${stats.inProgress}
+        Abertas: ${stats.open}
+        Canceladas: ${stats.cancelled}
+        Alta prioridade: ${stats.highPriority}
+        Atrasadas: ${stats.overdue}
+        
+        Retorne um JSON com:
+        {
+          "score": número de 0 a 100 representando a saúde do projeto,
+          "insights": array de até 3 insights sobre o estado atual,
+          "recommendations": array de até 3 recomendações de ação
+        }
+      `;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.3,
+        max_tokens: 300,
+      });
+
+      const response = completion.choices[0]?.message?.content?.trim();
+      
+      if (!response) {
+        return this.basicProjectAnalysis(tasks);
+      }
+
+      const analysis = JSON.parse(response);
+      return {
+        score: analysis.score || 50,
+        insights: analysis.insights || [],
+        recommendations: analysis.recommendations || [],
+      };
+      
+    } catch (error) {
+      console.error('OpenAI API error:', error);
+      return this.basicProjectAnalysis(tasks);
+    }
   }
 
   private basicProjectAnalysis(tasks: TaskWithDetails[]): {
@@ -206,41 +192,39 @@ class OpenAIService {
   } {
     const total = tasks.length;
     const completed = tasks.filter(t => t.status === 'concluida').length;
-    const overdue = tasks.filter(t => 
-      t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'concluida'
-    ).length;
+    const overdue = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date()).length;
+    const highPriority = tasks.filter(t => t.priority === 'alta' || t.priority === 'critica').length;
     
-    let score = 70; // Base score
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
+    const overdueRate = total > 0 ? (overdue / total) * 100 : 0;
     
-    if (total > 0) {
-      const completionRate = completed / total;
-      score += completionRate * 20; // Up to 20 points for completion
-      
-      const overdueRate = overdue / total;
-      score -= overdueRate * 30; // Lose up to 30 points for overdue tasks
-    }
-
-    const insights = [
-      `${completed} de ${total} tarefas concluídas (${Math.round((completed/total) * 100)}%)`,
-      overdue > 0 ? `${overdue} tarefas em atraso` : "Nenhuma tarefa em atraso",
-    ];
-
+    let score = completionRate;
+    if (overdueRate > 20) score -= 30;
+    if (highPriority > total * 0.3) score -= 20;
+    
+    score = Math.max(0, Math.min(100, score));
+    
+    const insights = [];
     const recommendations = [];
-    if (overdue > 0) {
-      recommendations.push("Priorizar tarefas em atraso");
+    
+    if (completionRate > 80) {
+      insights.push('Projeto com alta taxa de conclusão');
+    } else if (completionRate < 30) {
+      insights.push('Projeto com baixa taxa de conclusão');
+      recommendations.push('Revisar cronograma e prioridades');
     }
-    if (completed / total < 0.5) {
-      recommendations.push("Acelerar o ritmo de conclusão de tarefas");
+    
+    if (overdueRate > 20) {
+      insights.push('Muitas tarefas atrasadas');
+      recommendations.push('Renegociar prazos ou realocar recursos');
     }
-    if (tasks.filter(t => t.status === 'aberta').length > 5) {
-      recommendations.push("Distribuir melhor as tarefas abertas");
+    
+    if (highPriority > total * 0.3) {
+      insights.push('Muitas tarefas de alta prioridade');
+      recommendations.push('Priorizar tarefas críticas');
     }
-
-    return {
-      score: Math.max(0, Math.min(100, Math.round(score))),
-      insights,
-      recommendations: recommendations.length > 0 ? recommendations : ["Projeto está progredindo bem"],
-    };
+    
+    return { score, insights, recommendations };
   }
 }
 
