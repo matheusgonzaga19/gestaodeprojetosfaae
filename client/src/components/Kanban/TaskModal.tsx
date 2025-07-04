@@ -62,8 +62,10 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   // Mutations
   const createTaskMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("Enviando dados da tarefa:", data);
-      return await apiRequest('POST', '/api/tasks', data);
+      console.log("📤 Enviando dados da tarefa:", data);
+      const result = await apiRequest('POST', '/api/tasks', data);
+      console.log("✅ Tarefa criada com sucesso:", result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });

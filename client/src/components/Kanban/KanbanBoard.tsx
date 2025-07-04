@@ -165,7 +165,7 @@ export default function KanbanBoard() {
                 Nova Tarefa
               </Button>
             }
-            defaultStatus="pendente"
+            defaultStatus="aberta"
           />
         </div>
       </div>
