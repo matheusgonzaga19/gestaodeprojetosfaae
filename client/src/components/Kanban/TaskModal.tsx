@@ -33,9 +33,10 @@ interface TaskModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   defaultStatus?: string;
+  defaultProjectId?: number;
 }
 
-export default function TaskModal({ task, trigger, open, onOpenChange, defaultStatus }: TaskModalProps) {
+export default function TaskModal({ task, trigger, open, onOpenChange, defaultStatus, defaultProjectId }: TaskModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -51,11 +52,11 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const [estimatedHours, setEstimatedHours] = useState<string>("");
 
   // Data queries
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],
   });
 
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
 
@@ -151,7 +152,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     setDescription("");
     setPriority("media");
     setStatus(defaultStatus as any || "aberta");
-    setProjectId("");
+    setProjectId(defaultProjectId ? defaultProjectId.toString() : "");
     setAssignedUserId("");
     setDueDate("");
     setEstimatedHours("");
@@ -225,7 +226,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   };
 
   const getUserDisplayName = (userId: string) => {
-    const foundUser = users.find((u: any) => u.id === userId);
+    const foundUser = users.find((u: User) => u.id === userId);
     if (foundUser?.firstName && foundUser?.lastName) {
       return `${foundUser.firstName} ${foundUser.lastName}`;
     }
@@ -330,7 +331,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Nenhum projeto</SelectItem>
-                {projects.map((project: any) => (
+                {projects.map((project: Project) => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
                   </SelectItem>
@@ -348,7 +349,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Não atribuído</SelectItem>
-                {users.map((user: any) => (
+                {users.map((user: User) => (
                   <SelectItem key={user.id} value={user.id}>
                     {getUserDisplayName(user.id)}
                   </SelectItem>

@@ -53,6 +53,7 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { ProjectWithTasks, User, TaskWithDetails } from "@shared/schema";
+import TaskModal from "@/components/Kanban/TaskModal";
 
 interface ProjectModalProps {
   project?: ProjectWithTasks;
@@ -574,25 +575,59 @@ function ProjectDetails({ project, onBack }: { project: ProjectWithTasks; onBack
 
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Tarefas do Projeto</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Tarefas do Projeto</CardTitle>
+                <TaskModal
+                  trigger={
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Nova Tarefa
+                    </Button>
+                  }
+                  defaultStatus="aberta"
+                  defaultProjectId={project.id}
+                />
+              </div>
             </CardHeader>
             <CardContent>
               {project.tasks && project.tasks.length > 0 ? (
                 <div className="space-y-3">
                   {project.tasks.map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{task.title}</h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
-                      </div>
-                      <Badge variant="outline">{task.status}</Badge>
-                    </div>
+                    <TaskModal
+                      key={task.id}
+                      task={task}
+                      trigger={
+                        <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+                          <div>
+                            <h4 className="font-medium">{task.title}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{task.description}</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant="outline">{task.status}</Badge>
+                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                          </div>
+                        </div>
+                      }
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-gray-500 py-8">
-                  Nenhuma tarefa criada para este projeto
-                </p>
+                <div className="text-center py-8 space-y-4">
+                  <FileText className="w-12 h-12 text-gray-400 mx-auto" />
+                  <div>
+                    <p className="text-gray-500 mb-4">Nenhuma tarefa criada para este projeto</p>
+                    <TaskModal
+                      trigger={
+                        <Button variant="outline">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Criar Primeira Tarefa
+                        </Button>
+                      }
+                      defaultStatus="aberta"
+                      defaultProjectId={project.id}
+                    />
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
