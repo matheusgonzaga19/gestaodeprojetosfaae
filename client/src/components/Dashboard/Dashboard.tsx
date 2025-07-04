@@ -74,7 +74,7 @@ export default function Dashboard() {
     doc.text(`Total de Tarefas: ${dashboardStats?.totalTasks || 0}`, 20, 55);
     doc.text(`Tarefas Concluídas: ${dashboardStats?.completedTasks || 0}`, 20, 65);
     doc.text(`Projetos Ativos: ${dashboardStats?.activeProjects || 0}`, 20, 75);
-    doc.text(`Horas Trabalhadas: ${dashboardStats?.totalHours || 0}`, 20, 85);
+    doc.text(`Horas Trabalhadas: ${Number(dashboardStats?.totalHours || 0).toFixed(2)}`, 20, 85);
     doc.text(`Eficiência: ${dashboardStats?.efficiency || 0}%`, 20, 95);
     
     // Add user stats if available
@@ -84,7 +84,7 @@ export default function Dashboard() {
       doc.setFontSize(12);
       doc.text(`Suas Tarefas: ${userStats.taskCount || 0}`, 20, 125);
       doc.text(`Concluídas: ${userStats.completedTaskCount || 0}`, 20, 135);
-      doc.text(`Horas Trabalhadas: ${userStats.hoursWorked || 0}`, 20, 145);
+      doc.text(`Horas Trabalhadas: ${Number(userStats.hoursWorked || 0).toFixed(2)}`, 20, 145);
       doc.text(`Sua Eficiência: ${userStats.efficiency || 0}%`, 20, 155);
     }
     
@@ -364,7 +364,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Horas Trabalhadas</p>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalHours || 0}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{Number(dashboardStats?.totalHours || 0).toFixed(2)}</p>
               </div>
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-orange-600 flex-shrink-0" />
             </div>

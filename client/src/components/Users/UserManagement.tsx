@@ -403,7 +403,7 @@ export default function UserManagement() {
                                     <div className="text-sm text-gray-500">Concluídas</div>
                                   </div>
                                   <div className="text-center">
-                                    <div className="text-2xl font-bold text-purple-600">{Math.round(user.hoursWorked || 0)}h</div>
+                                    <div className="text-2xl font-bold text-purple-600">{Number(user.hoursWorked || 0).toFixed(2)}h</div>
                                     <div className="text-sm text-gray-500">Horas Trabalhadas</div>
                                   </div>
                                   <div className="text-center">

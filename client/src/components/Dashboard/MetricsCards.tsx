@@ -27,8 +27,8 @@ export default function MetricsCards({ stats, userStats }: MetricsCardsProps) {
     },
     {
       title: "Horas Trabalhadas",
-      value: Math.round(stats?.totalHours || 0),
-      change: Math.round(userStats?.hoursWorked || 0),
+      value: Number(stats?.totalHours || 0).toFixed(2),
+      change: `+${Number(userStats?.hoursWorked || 0).toFixed(2)}`,
       changeType: "positive" as const,
       icon: "fas fa-clock",
       iconColor: "text-amber-500",
