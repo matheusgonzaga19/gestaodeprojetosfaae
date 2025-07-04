@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Download, Filter, TrendingUp, Users, CheckCircle, Clock } from "lucide-react";
+import { CalendarIcon, Download, Filter, TrendingUp, Users, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import type { DashboardStats, UserStats } from "@/types";
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   
   // Filters state
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [dateRange, setDateRange] = useState<{
     from: Date | undefined;
     to: Date | undefined;
@@ -179,15 +180,26 @@ export default function Dashboard() {
       {/* Filters */}
       <Card className="border-gray-200 dark:border-gray-700">
         <CardHeader className="pb-3 sm:pb-4">
-          <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
-            <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
-            Filtros
+          <CardTitle 
+            className="flex items-center justify-between text-sm sm:text-base lg:text-lg cursor-pointer"
+            onClick={() => setFiltersExpanded(!filtersExpanded)}
+          >
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
+              Filtros
+            </div>
+            {filtersExpanded ? (
+              <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5" />
+            ) : (
+              <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
-            {/* Date Range */}
-            <div className="space-y-2 sm:col-span-2 md:col-span-1">
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${filtersExpanded ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+              {/* Date Range */}
+              <div className="space-y-2 sm:col-span-2 md:col-span-1">
               <label className="text-sm font-medium">Período</label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -306,6 +318,7 @@ export default function Dashboard() {
             </div>
           </div>
         </CardContent>
+        </div>
       </Card>
 
       {/* Stats Cards */}
