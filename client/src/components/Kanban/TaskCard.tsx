@@ -72,27 +72,27 @@ export default function TaskCard({ task, onDragStart }: TaskCardProps) {
     <div
       draggable
       onDragStart={(e) => onDragStart(e, task.id)}
-      className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-100 dark:border-gray-600 cursor-move hover:shadow-md transition-shadow group"
+      className="bg-white dark:bg-gray-700 rounded-lg p-3 sm:p-4 shadow-sm border border-gray-100 dark:border-gray-600 cursor-move hover:shadow-md transition-shadow group"
     >
       {/* Priority and Drag Handle */}
       <div className="flex items-center justify-between mb-2">
         <Badge
           variant="secondary"
-          className={PRIORITY_COLORS[task.priority as keyof typeof PRIORITY_COLORS]}
+          className={`${PRIORITY_COLORS[task.priority as keyof typeof PRIORITY_COLORS]} text-xs px-1.5 py-0.5`}
         >
           {PRIORITY_LABELS[task.priority as keyof typeof PRIORITY_LABELS]}
         </Badge>
-        <i className="fas fa-grip-dots text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"></i>
+        <i className="fas fa-grip-dots text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 text-sm"></i>
       </div>
 
       {/* Task Title */}
-      <h4 className="font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+      <h4 className="font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
         {task.title}
       </h4>
 
       {/* Task Description */}
       {task.description && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
           {task.description}
         </p>
       )}

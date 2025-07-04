@@ -38,18 +38,18 @@ export default function Header({ user, activeSection, onSectionChange }: HeaderP
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+      <div className="flex items-center justify-between px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
         {/* Logo and Title */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-            <i className="fas fa-building text-white text-sm sm:text-lg"></i>
+        <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4 min-w-0">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i className="fas fa-building text-white text-xs sm:text-sm lg:text-lg"></i>
           </div>
-          <div className="hidden sm:block">
-            <h1 className="text-xl font-bold">FAAE Projetos</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Gestão Inteligente</p>
+          <div className="hidden sm:block min-w-0">
+            <h1 className="text-lg lg:text-xl font-bold truncate">FAAE Projetos</h1>
+            <p className="text-xs lg:text-sm text-gray-500 dark:text-gray-400 truncate">Gestão Inteligente</p>
           </div>
-          <div className="sm:hidden">
-            <h1 className="text-lg font-bold">FAAE</h1>
+          <div className="sm:hidden min-w-0">
+            <h1 className="text-base font-bold truncate">FAAE</h1>
           </div>
         </div>
         
@@ -61,7 +61,7 @@ export default function Header({ user, activeSection, onSectionChange }: HeaderP
         />
         
         {/* User Menu */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
           {/* Notifications */}
           <div className="relative">
             <button 

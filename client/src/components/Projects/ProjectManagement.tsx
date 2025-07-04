@@ -335,17 +335,17 @@ function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; 
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
-    <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onSelectProject(project)}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-lg">{project.name}</CardTitle>
-            <CardDescription className="line-clamp-2">
+    <Card className="hover:shadow-lg transition-shadow cursor-pointer border-gray-200 dark:border-gray-700" onClick={() => onSelectProject(project)}>
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 min-w-0 flex-1">
+            <CardTitle className="text-sm sm:text-base lg:text-lg line-clamp-1">{project.name}</CardTitle>
+            <CardDescription className="line-clamp-2 text-xs sm:text-sm">
               {project.description || "Sem descrição"}
             </CardDescription>
           </div>
-          <div className="flex items-center space-x-2">
-            <Badge className={getStatusColor(project.status)}>
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+            <Badge className={`${getStatusColor(project.status)} text-xs px-2 py-1`}>
               {getStatusLabel(project.status)}
             </Badge>
             
@@ -386,34 +386,34 @@ function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; 
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+      <CardContent className="space-y-3 sm:space-y-4 pt-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center space-x-1">
-            <Building className="w-4 h-4" />
-            <span>{getTypeLabel(project.type)}</span>
+            <Building className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+            <span className="truncate">{getTypeLabel(project.type)}</span>
           </div>
           {project.endDate && (
             <div className="flex items-center space-x-1">
-              <Calendar className="w-4 h-4" />
-              <span>{format(new Date(project.endDate), 'dd/MM/yyyy')}</span>
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="whitespace-nowrap">{format(new Date(project.endDate), 'dd/MM/yyyy')}</span>
             </div>
           )}
         </div>
 
         {totalTasks > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-1 sm:space-y-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
               <span className="text-gray-600 dark:text-gray-400">Progresso das Tarefas</span>
               <span className="font-medium">{completedTasks}/{totalTasks}</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-1.5 sm:h-2" />
           </div>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center space-x-1">
-              <FileText className="w-4 h-4" />
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
               <span>{totalTasks} tarefas</span>
             </div>
             {project.budget && (
@@ -467,18 +467,18 @@ export default function ProjectManagement() {
   }
 
   return (
-    <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold">Projetos</h2>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+    <div className="p-2 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 lg:space-y-8 min-h-screen">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="w-full sm:w-auto">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">Projetos</h2>
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400 mt-1">
             Gerencie seus projetos arquitetônicos
           </p>
         </div>
         <ProjectModal
           trigger={
-            <Button className="w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button className="w-full sm:w-auto px-3 sm:px-4 py-2 text-sm">
+              <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
               <span className="hidden sm:inline">Novo Projeto</span>
               <span className="sm:hidden">Novo</span>
             </Button>
@@ -509,7 +509,7 @@ export default function ProjectManagement() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {projects.map((project) => (
             <ProjectCard
               key={project.id}

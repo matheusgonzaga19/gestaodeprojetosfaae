@@ -156,20 +156,20 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
+    <div className="p-2 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Visão geral dos seus projetos e tarefas</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="w-full sm:w-auto">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400 mt-1">Visão geral dos seus projetos e tarefas</p>
         </div>
         
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
           <Button
             onClick={generatePDFReport}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none"
+            className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
             <span className="hidden sm:inline">Exportar PDF</span>
             <span className="sm:hidden">PDF</span>
           </Button>
@@ -177,15 +177,15 @@ export default function Dashboard() {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+      <Card className="border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
             <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
             Filtros
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
             {/* Date Range */}
             <div className="space-y-2 sm:col-span-2 md:col-span-1">
               <label className="text-sm font-medium">Período</label>
@@ -309,65 +309,65 @@ export default function Dashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <Card>
-          <CardContent className="p-4 sm:p-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total de Tarefas</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalTasks || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Total de Tarefas</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalTasks || 0}</p>
               </div>
-              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-blue-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4 sm:p-6">
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Tarefas Concluídas</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.completedTasks || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Tarefas Concluídas</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.completedTasks || 0}</p>
               </div>
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-green-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4 sm:p-6">
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Projetos Ativos</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.activeProjects || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Projetos Ativos</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.activeProjects || 0}</p>
               </div>
-              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+              <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-purple-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4 sm:p-6">
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Horas Trabalhadas</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalHours || 0}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">Horas Trabalhadas</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalHours || 0}</p>
               </div>
-              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-orange-600 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
         {/* Tasks by Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base sm:text-lg">Tarefas por Status</CardTitle>
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Tarefas por Status</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-64 sm:h-80">
+          <CardContent className="pt-0">
+            <div className="h-48 sm:h-64 lg:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -376,7 +376,7 @@ export default function Dashboard() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={window.innerWidth > 640 ? 80 : 60}
+                    outerRadius={window.innerWidth > 1024 ? 80 : window.innerWidth > 640 ? 70 : 50}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -392,17 +392,17 @@ export default function Dashboard() {
         </Card>
 
         {/* Tasks by Priority */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tarefas por Prioridade</CardTitle>
+        <Card className="border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Tarefas por Prioridade</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-80">
+          <CardContent className="pt-0">
+            <div className="h-48 sm:h-64 lg:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={getTasksByPriority()}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis dataKey="name" fontSize={window.innerWidth > 640 ? 12 : 10} />
+                  <YAxis fontSize={window.innerWidth > 640 ? 12 : 10} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#8884d8" />
                 </BarChart>
@@ -412,17 +412,17 @@ export default function Dashboard() {
         </Card>
 
         {/* Tasks Over Time */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Evolução de Tarefas</CardTitle>
+        <Card className="lg:col-span-2 border-gray-200 dark:border-gray-700">
+          <CardHeader className="pb-3 sm:pb-4">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Evolução de Tarefas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-80">
+          <CardContent className="pt-0">
+            <div className="h-48 sm:h-64 lg:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={getTasksOverTime()}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                  <XAxis dataKey="name" fontSize={window.innerWidth > 640 ? 12 : 10} />
+                  <YAxis fontSize={window.innerWidth > 640 ? 12 : 10} />
                   <Tooltip />
                   <Line type="monotone" dataKey="tasks" stroke="#8884d8" strokeWidth={2} />
                 </LineChart>
@@ -433,21 +433,21 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Atividade Recente</CardTitle>
+      <Card className="border-gray-200 dark:border-gray-700">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-sm sm:text-base lg:text-lg">Atividade Recente</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="pt-0">
+          <div className="space-y-2 sm:space-y-3">
             {tasks.slice(0, 5).map((task: any, index: number) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-blue-600" />
+              <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                   </div>
-                  <div>
-                    <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{task.description}</p>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-medium text-sm sm:text-base truncate">{task.title}</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-1">{task.description}</p>
                   </div>
                 </div>
                 <div className="text-right">

@@ -86,7 +86,7 @@ export default function Home() {
         onSectionChange={setActiveSection} 
       />
       
-      <main className="transition-all duration-300 pb-16 lg:pb-0">
+      <main className="transition-all duration-300 pb-16 lg:pb-0 min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-5rem)]">
         {renderActiveSection()}
       </main>
 
