@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Header from "@/components/Layout/Header";
 import Dashboard from "@/components/Dashboard/Dashboard";
+import AdvancedDashboard from "@/components/Dashboard/AdvancedDashboard";
 import KanbanBoard from "@/components/Kanban/KanbanBoard";
 import CalendarView from "@/components/Calendar/CalendarView";
 import FileManager from "@/components/Files/FileManager";
@@ -15,7 +16,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
 import type { User } from "@shared/schema";
 
-type Section = 'dashboard' | 'kanban' | 'projects' | 'calendar' | 'files' | 'chat' | 'users';
+type Section = 'dashboard' | 'advanced-dashboard' | 'kanban' | 'projects' | 'calendar' | 'files' | 'chat' | 'users';
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -59,6 +60,8 @@ export default function Home() {
     switch (activeSection) {
       case 'dashboard':
         return <Dashboard />;
+      case 'advanced-dashboard':
+        return user.role === 'admin' ? <AdvancedDashboard /> : <Dashboard />;
       case 'kanban':
         return <KanbanBoard />;
       case 'projects':

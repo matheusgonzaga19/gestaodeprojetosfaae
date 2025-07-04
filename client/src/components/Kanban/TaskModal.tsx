@@ -38,12 +38,12 @@ interface TaskModalProps {
 export default function TaskModal({ task, trigger, open, onOpenChange, defaultStatus }: TaskModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(open || false);
+  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     priority: "media" as "baixa" | "media" | "alta" | "critica",
-    status: defaultStatus || "pendente",
+    status: defaultStatus || "aberta",
     projectId: "",
     assignedUserId: "",
     dueDate: "",
@@ -69,8 +69,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
         title: "Tarefa criada",
         description: "A tarefa foi criada com sucesso.",
       });
-      setIsOpen(false);
-      resetForm();
+      handleOpenChange(false);
     },
     onError: (error) => {
       toast({
@@ -91,7 +90,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
         title: "Tarefa atualizada",
         description: "A tarefa foi atualizada com sucesso.",
       });
-      setIsOpen(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       toast({
@@ -112,7 +111,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
         title: "Tarefa excluída",
         description: "A tarefa foi excluída com sucesso.",
       });
-      setIsOpen(false);
+      handleOpenChange(false);
     },
     onError: (error) => {
       toast({
@@ -123,33 +122,50 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
   });
 
+  // Sync external open prop with internal state
   useEffect(() => {
-    if (task) {
+    if (open !== undefined) {
+      setIsOpen(open);
+    }
+  }, [open]);
+
+  // Load task data when editing
+  useEffect(() => {
+    if (task && isOpen) {
       setFormData({
         title: task.title || "",
         description: task.description || "",
         priority: task.priority || "media",
-        status: task.status || "pendente",
+        status: task.status || "aberta",
         projectId: task.projectId?.toString() || "",
         assignedUserId: task.assignedUserId || "",
         dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "",
         estimatedHours: task.estimatedHours?.toString() || "",
       });
+    } else if (!task && isOpen) {
+      // Reset form for new task
+      resetForm();
     }
-  }, [task]);
+  }, [task, isOpen]);
 
-  useEffect(() => {
+  // Notify parent of open state changes
+  const handleOpenChange = (newOpen: boolean) => {
+    setIsOpen(newOpen);
     if (onOpenChange) {
-      onOpenChange(isOpen);
+      onOpenChange(newOpen);
     }
-  }, [isOpen, onOpenChange]);
+    if (!newOpen && !task) {
+      // Reset form when closing for new tasks
+      resetForm();
+    }
+  };
 
   const resetForm = () => {
     setFormData({
       title: "",
       description: "",
       priority: "media",
-      status: defaultStatus || "pendente",
+      status: defaultStatus || "aberta",
       projectId: "",
       assignedUserId: "",
       dueDate: "",
@@ -207,7 +223,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const DialogWrapper = ({ children }: { children: React.ReactNode }) => {
     if (trigger) {
       return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             {trigger}
           </DialogTrigger>
@@ -216,7 +232,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       );
     }
     return (
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         {children}
       </Dialog>
     );
@@ -278,7 +294,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pendente">Pendente</SelectItem>
+                    <SelectItem value="aberta">Aberta</SelectItem>
                     <SelectItem value="em_andamento">Em Andamento</SelectItem>
                     <SelectItem value="concluida">Concluída</SelectItem>
                     <SelectItem value="cancelada">Cancelada</SelectItem>
