@@ -186,7 +186,10 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     }
 
     const taskData = {
-      ...formData,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      priority: formData.priority,
+      status: formData.status,
       projectId: formData.projectId && formData.projectId !== "none" ? parseInt(formData.projectId) : null,
       assignedUserId: formData.assignedUserId && formData.assignedUserId !== "none" ? formData.assignedUserId : user?.id || null,
       estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : null,

@@ -14,9 +14,8 @@ export default function Navigation({ activeSection, onSectionChange, userRole }:
     { id: 'chat', label: 'IA Chat', icon: 'fas fa-robot' },
   ];
 
-  // Add admin-only tabs
+  // Add users tab for admins
   if (userRole === 'admin') {
-    navItems.push({ id: 'advanced-dashboard', label: 'Dashboard Avançado', icon: 'fas fa-chart-pie' });
     navItems.push({ id: 'users', label: 'Usuários', icon: 'fas fa-users' });
   }
 

@@ -146,6 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tasks', isAuthenticated, async (req, res) => {
     try {
       const userId = getUserId(req);
+      console.log("Creating task with data:", req.body);
       const validatedData = insertTaskSchema.parse({
         ...req.body,
         createdUserId: userId,
