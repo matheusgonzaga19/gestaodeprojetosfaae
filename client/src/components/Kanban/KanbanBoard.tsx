@@ -12,8 +12,8 @@ import type { TaskWithDetails, User, Project } from "@shared/schema";
 
 const KANBAN_COLUMNS = [
   {
-    id: "pendente",
-    title: "Pendente",
+    id: "aberta",
+    title: "Aberta",
     color: "bg-gray-50 dark:bg-gray-800",
     badgeColor: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
   },

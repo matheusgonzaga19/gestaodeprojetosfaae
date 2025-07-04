@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarIcon, Plus, Edit, Trash2 } from "lucide-react";
+import { CalendarIcon, Plus, Edit, Trash2, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { TaskWithDetails, User, Project } from "@shared/schema";
@@ -39,42 +39,48 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    priority: "media" as "baixa" | "media" | "alta" | "critica",
-    status: defaultStatus || "aberta",
-    projectId: "",
-    assignedUserId: "",
-    dueDate: "",
-    estimatedHours: "",
-  });
+  
+  // Form state
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<"baixa" | "media" | "alta" | "critica">("media");
+  const [status, setStatus] = useState<"aberta" | "em_andamento" | "concluida" | "cancelada">("aberta");
+  const [projectId, setProjectId] = useState<string>("");
+  const [assignedUserId, setAssignedUserId] = useState<string>("");
+  const [dueDate, setDueDate] = useState<string>("");
+  const [estimatedHours, setEstimatedHours] = useState<string>("");
 
-  const { data: users = [] } = useQuery<User[]>({
+  // Data queries
+  const { data: users = [] } = useQuery({
     queryKey: ['/api/users'],
-    enabled: user?.role === 'admin',
   });
 
-  const { data: projects = [] } = useQuery<Project[]>({
+  const { data: projects = [] } = useQuery({
     queryKey: ['/api/projects'],
   });
 
+  // Mutations
   const createTaskMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Enviando dados da tarefa:", data);
       return await apiRequest('POST', '/api/tasks', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
       toast({
         title: "Tarefa criada",
         description: "A tarefa foi criada com sucesso.",
       });
       handleOpenChange(false);
+      resetForm();
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Erro ao criar tarefa:", error);
       toast({
         title: "Erro ao criar tarefa",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },
@@ -86,16 +92,18 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
       toast({
         title: "Tarefa atualizada",
         description: "A tarefa foi atualizada com sucesso.",
       });
       handleOpenChange(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao atualizar tarefa",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },
@@ -107,20 +115,45 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
       toast({
         title: "Tarefa excluída",
         description: "A tarefa foi excluída com sucesso.",
       });
       handleOpenChange(false);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro ao excluir tarefa",
-        description: error.message,
+        description: error.message || "Erro desconhecido",
         variant: "destructive",
       });
     },
   });
+
+  // Handle modal open/close
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (onOpenChange) {
+      onOpenChange(open);
+    }
+    if (!open) {
+      resetForm();
+    }
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setPriority("media");
+    setStatus(defaultStatus as any || "aberta");
+    setProjectId("");
+    setAssignedUserId("");
+    setDueDate("");
+    setEstimatedHours("");
+  };
 
   // Sync external open prop with internal state
   useEffect(() => {
@@ -132,51 +165,24 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   // Load task data when editing
   useEffect(() => {
     if (task && isOpen) {
-      setFormData({
-        title: task.title || "",
-        description: task.description || "",
-        priority: task.priority || "media",
-        status: task.status || "aberta",
-        projectId: task.projectId?.toString() || "",
-        assignedUserId: task.assignedUserId || "",
-        dueDate: task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "",
-        estimatedHours: task.estimatedHours?.toString() || "",
-      });
+      setTitle(task.title || "");
+      setDescription(task.description || "");
+      setPriority(task.priority || "media");
+      setStatus(task.status || "aberta");
+      setProjectId(task.projectId?.toString() || "");
+      setAssignedUserId(task.assignedUserId || "");
+      setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "");
+      setEstimatedHours(task.estimatedHours?.toString() || "");
     } else if (!task && isOpen) {
-      // Reset form for new task
       resetForm();
     }
-  }, [task, isOpen]);
+  }, [task, isOpen, defaultStatus]);
 
-  // Notify parent of open state changes
-  const handleOpenChange = (newOpen: boolean) => {
-    setIsOpen(newOpen);
-    if (onOpenChange) {
-      onOpenChange(newOpen);
-    }
-    if (!newOpen && !task) {
-      // Reset form when closing for new tasks
-      resetForm();
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      priority: "media",
-      status: defaultStatus || "aberta",
-      projectId: "",
-      assignedUserId: "",
-      dueDate: "",
-      estimatedHours: "",
-    });
-  };
-
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim()) {
+    if (!title.trim()) {
       toast({
         title: "Erro de validação",
         description: "O título da tarefa é obrigatório.",
@@ -185,15 +191,16 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       return;
     }
 
+    // Prepare task data
     const taskData = {
-      title: formData.title.trim(),
-      description: formData.description.trim(),
-      priority: formData.priority,
-      status: formData.status,
-      projectId: formData.projectId && formData.projectId !== "none" ? parseInt(formData.projectId) : null,
-      assignedUserId: formData.assignedUserId && formData.assignedUserId !== "none" ? formData.assignedUserId : user?.id || null,
-      estimatedHours: formData.estimatedHours ? parseFloat(formData.estimatedHours) : null,
-      dueDate: formData.dueDate || null,
+      title: title.trim(),
+      description: description.trim(),
+      priority,
+      status,
+      projectId: projectId && projectId !== "" ? parseInt(projectId) : null,
+      assignedUserId: assignedUserId && assignedUserId !== "" ? assignedUserId : user?.id || null,
+      estimatedHours: estimatedHours && estimatedHours !== "" ? parseFloat(estimatedHours) : null,
+      dueDate: dueDate && dueDate !== "" ? dueDate : null,
     };
 
     if (task) {
@@ -216,198 +223,186 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   };
 
   const getUserDisplayName = (userId: string) => {
-    const foundUser = users.find(u => u.id === userId);
+    const foundUser = users.find((u: any) => u.id === userId);
     if (foundUser?.firstName && foundUser?.lastName) {
       return `${foundUser.firstName} ${foundUser.lastName}`;
     }
     return foundUser?.email || 'Usuário';
   };
 
-  const DialogWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (trigger) {
-      return (
-        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-          <DialogTrigger asChild>
-            {trigger}
-          </DialogTrigger>
-          {children}
-        </Dialog>
-      );
-    }
-    return (
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        {children}
-      </Dialog>
-    );
-  };
+  const triggerButton = trigger || (
+    <Button 
+      size="sm" 
+      className="bg-blue-600 hover:bg-blue-700"
+    >
+      <Plus className="w-4 h-4 mr-2" />
+      Adicionar Tarefa
+    </Button>
+  );
 
   return (
-    <DialogWrapper>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {triggerButton}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {task ? 'Editar Tarefa' : 'Nova Tarefa'}
+          <DialogTitle className="flex items-center justify-between">
+            {task ? "Editar Tarefa" : "Nova Tarefa"}
+            {task && canEditTask() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Título *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Digite o título da tarefa"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="description">Descrição</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Descreva a tarefa"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="priority">Prioridade</Label>
-                <Select value={formData.priority} onValueChange={(value) => setFormData({ ...formData, priority: value as "baixa" | "media" | "alta" | "critica" })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="baixa">Baixa</SelectItem>
-                    <SelectItem value="media">Média</SelectItem>
-                    <SelectItem value="alta">Alta</SelectItem>
-                    <SelectItem value="critica">Crítica</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="status">Status</Label>
-                <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="aberta">Aberta</SelectItem>
-                    <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                    <SelectItem value="concluida">Concluída</SelectItem>
-                    <SelectItem value="cancelada">Cancelada</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="project">Projeto</Label>
-              <Select value={formData.projectId} onValueChange={(value) => setFormData({ ...formData, projectId: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um projeto" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum projeto</SelectItem>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {user?.role === 'admin' && (
-              <div>
-                <Label htmlFor="assignedUser">Responsável</Label>
-                <Select value={formData.assignedUserId} onValueChange={(value) => setFormData({ ...formData, assignedUserId: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um responsável" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhum responsável</SelectItem>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        <div className="flex items-center space-x-2">
-                          <Avatar className="w-5 h-5">
-                            <AvatarImage src={user.profileImageUrl || undefined} />
-                            <AvatarFallback className="text-xs">
-                              {getUserDisplayName(user.id).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span>{getUserDisplayName(user.id)}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="dueDate">Data de Entrega</Label>
-                <Input
-                  id="dueDate"
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="estimatedHours">Horas Estimadas</Label>
-                <Input
-                  id="estimatedHours"
-                  type="number"
-                  step="0.5"
-                  value={formData.estimatedHours}
-                  onChange={(e) => setFormData({ ...formData, estimatedHours: e.target.value })}
-                  placeholder="Ex: 8.5"
-                />
-              </div>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Title */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Título *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Digite o título da tarefa"
+              required
+            />
           </div>
 
-          <div className="flex justify-between">
-            <div>
-              {task && canEditTask() && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleteTaskMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Excluir
-                </Button>
-              )}
-            </div>
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Digite a descrição da tarefa"
+              rows={3}
+            />
+          </div>
 
-            <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createTaskMutation.isPending || updateTaskMutation.isPending}
-              >
-                {task ? 'Atualizar' : 'Criar'} Tarefa
-              </Button>
-            </div>
+          {/* Priority */}
+          <div className="space-y-2">
+            <Label htmlFor="priority">Prioridade</Label>
+            <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a prioridade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="baixa">Baixa</SelectItem>
+                <SelectItem value="media">Média</SelectItem>
+                <SelectItem value="alta">Alta</SelectItem>
+                <SelectItem value="critica">Crítica</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Status */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="aberta">Aberta</SelectItem>
+                <SelectItem value="em_andamento">Em Andamento</SelectItem>
+                <SelectItem value="concluida">Concluída</SelectItem>
+                <SelectItem value="cancelada">Cancelada</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Project */}
+          <div className="space-y-2">
+            <Label htmlFor="project">Projeto</Label>
+            <Select value={projectId} onValueChange={setProjectId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um projeto (opcional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Nenhum projeto</SelectItem>
+                {projects.map((project: any) => (
+                  <SelectItem key={project.id} value={project.id.toString()}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Assigned User */}
+          <div className="space-y-2">
+            <Label htmlFor="assigned">Atribuído para</Label>
+            <Select value={assignedUserId} onValueChange={setAssignedUserId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um usuário" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Não atribuído</SelectItem>
+                {users.map((user: any) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {getUserDisplayName(user.id)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Due Date */}
+          <div className="space-y-2">
+            <Label htmlFor="dueDate">Data de Vencimento</Label>
+            <Input
+              id="dueDate"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
+
+          {/* Estimated Hours */}
+          <div className="space-y-2">
+            <Label htmlFor="estimatedHours">Horas Estimadas</Label>
+            <Input
+              id="estimatedHours"
+              type="number"
+              step="0.5"
+              min="0"
+              value={estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value)}
+              placeholder="0.0"
+            />
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={createTaskMutation.isPending || updateTaskMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {createTaskMutation.isPending || updateTaskMutation.isPending
+                ? "Salvando..."
+                : task
+                ? "Atualizar"
+                : "Criar Tarefa"}
+            </Button>
           </div>
         </form>
       </DialogContent>
-    </DialogWrapper>
+    </Dialog>
   );
 }

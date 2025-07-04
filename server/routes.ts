@@ -147,10 +147,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = getUserId(req);
       console.log("Creating task with data:", req.body);
-      const validatedData = insertTaskSchema.parse({
+      
+      // Validate and clean data before schema validation
+      const cleanData = {
         ...req.body,
         createdUserId: userId,
-      });
+        // Ensure status is valid
+        status: req.body.status || "aberta",
+        // Ensure priority is valid  
+        priority: req.body.priority || "media",
+      };
+      
+      const validatedData = insertTaskSchema.parse(cleanData);
       
       const task = await storage.createTask(validatedData);
       
