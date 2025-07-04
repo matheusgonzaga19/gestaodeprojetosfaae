@@ -21,6 +21,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,6 +47,8 @@ import {
   Building,
   ChevronRight,
   MoreVertical,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -257,6 +265,40 @@ function ProjectModal({ project, trigger }: ProjectModalProps) {
 }
 
 function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; onSelectProject: (project: ProjectWithTasks) => void }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('DELETE', `/api/projects/${project.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Projeto excluído",
+        description: "O projeto foi excluído com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir projeto",
+        description: error.message || "Erro desconhecido",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.")) {
+      deleteProjectMutation.mutate();
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // O modal de edição será aberto
+  };
   const getStatusColor = (status: string) => {
     const colors = {
       active: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
@@ -306,6 +348,40 @@ function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; 
             <Badge className={getStatusColor(project.status)}>
               {getStatusLabel(project.status)}
             </Badge>
+            
+            {/* Menu de ações */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <ProjectModal
+                  project={project}
+                  trigger={
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Editar
+                    </DropdownMenuItem>
+                  }
+                />
+                {user?.role === 'admin' && (
+                  <DropdownMenuItem 
+                    onClick={handleDelete}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </CardHeader>
@@ -448,11 +524,25 @@ export default function ProjectManagement() {
 
 // Componente ProjectDetails será criado em seguida
 function ProjectDetails({ project, onBack }: { project: ProjectWithTasks; onBack: () => void }) {
+  const { user } = useAuth();
+
   return (
     <div className="p-6">
-      <Button onClick={onBack} variant="outline" className="mb-6">
-        ← Voltar aos Projetos
-      </Button>
+      <div className="flex items-center justify-between mb-6">
+        <Button onClick={onBack} variant="outline">
+          ← Voltar aos Projetos
+        </Button>
+        
+        <ProjectModal
+          project={project}
+          trigger={
+            <Button>
+              <Edit className="w-4 h-4 mr-2" />
+              Editar Projeto
+            </Button>
+          }
+        />
+      </div>
       
       <div className="space-y-6">
         <div>
