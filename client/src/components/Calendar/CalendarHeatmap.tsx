@@ -1,12 +1,13 @@
 import { useMemo } from "react";
-import type { TaskWithDetails } from "@/types";
+import type { TaskWithDetails } from "@shared/schema";
 
 interface CalendarHeatmapProps {
   tasks: TaskWithDetails[];
   year: number;
+  holidays?: Array<{ date: string; name: string; type: string }>;
 }
 
-export default function CalendarHeatmap({ tasks, year }: CalendarHeatmapProps) {
+export default function CalendarHeatmap({ tasks, year, holidays = [] }: CalendarHeatmapProps) {
   const heatmapData = useMemo(() => {
     // Generate all days for the year
     const startDate = new Date(year, 0, 1);
@@ -32,6 +33,7 @@ export default function CalendarHeatmap({ tasks, year }: CalendarHeatmapProps) {
 
       // Count created tasks for this day
       const createdTasks = tasks.filter(task => {
+        if (!task.createdAt) return false;
         const createdDate = new Date(task.createdAt).toISOString().split('T')[0];
         return createdDate === dateStr;
       }).length;
