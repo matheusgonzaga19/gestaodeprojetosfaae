@@ -96,7 +96,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             <div className="flex items-center text-gray-600 dark:text-gray-400">
               <i className="fas fa-clock mr-2 text-orange-500"></i>
               <span>
-                {task.actualHours ? Math.round(Number(task.actualHours)) : 0}h / {Math.round(Number(task.estimatedHours))}h
+                {task.actualHours ? Number(task.actualHours).toFixed(1) : '0.0'}h / {Number(task.estimatedHours).toFixed(1)}h
               </span>
             </div>
           )}

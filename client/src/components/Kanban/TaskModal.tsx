@@ -50,6 +50,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const [assignedUserId, setAssignedUserId] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [estimatedHours, setEstimatedHours] = useState<string>("");
+  const [actualHours, setActualHours] = useState<string>("");
 
   // Data queries
   const { data: users = [] } = useQuery<User[]>({
@@ -156,6 +157,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     setAssignedUserId("");
     setDueDate("");
     setEstimatedHours("");
+    setActualHours("");
   };
 
   // Sync external open prop with internal state
@@ -176,6 +178,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       setAssignedUserId(task.assignedUserId || "");
       setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "");
       setEstimatedHours(task.estimatedHours?.toString() || "");
+      setActualHours(task.actualHours?.toString() || "");
     } else if (!task && isOpen) {
       resetForm();
     }
@@ -203,6 +206,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       projectId: projectId && projectId !== "" ? parseInt(projectId) : null,
       assignedUserId: assignedUserId && assignedUserId !== "" ? assignedUserId : user?.id || null,
       estimatedHours: estimatedHours && estimatedHours !== "" ? parseFloat(estimatedHours) : null,
+      actualHours: actualHours && actualHours !== "" ? parseFloat(actualHours) : null,
       dueDate: dueDate && dueDate !== "" ? dueDate : null,
     };
 
@@ -381,6 +385,26 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
               onChange={(e) => setEstimatedHours(e.target.value)}
               placeholder="0.0"
             />
+          </div>
+
+          {/* Actual Hours */}
+          <div className="space-y-2">
+            <Label htmlFor="actualHours">Horas Trabalhadas</Label>
+            <Input
+              id="actualHours"
+              type="number"
+              step="0.5"
+              min="0"
+              value={actualHours}
+              onChange={(e) => setActualHours(e.target.value)}
+              placeholder="0.0"
+            />
+            {actualHours && estimatedHours && Number(actualHours) > Number(estimatedHours) && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center">
+                <i className="fas fa-exclamation-triangle mr-1"></i>
+                Horas trabalhadas excedem as estimadas
+              </p>
+            )}
           </div>
 
           {/* Form Actions */}

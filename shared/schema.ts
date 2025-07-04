@@ -74,7 +74,7 @@ export const tasks = pgTable("tasks", {
   startDate: date("start_date"),
   dueDate: date("due_date"),
   estimatedHours: decimal("estimated_hours", { precision: 5, scale: 2 }),
-  actualHours: decimal("actual_hours", { precision: 5, scale: 2 }),
+  actualHours: decimal("actual_hours", { precision: 5, scale: 2 }).default('0'),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
