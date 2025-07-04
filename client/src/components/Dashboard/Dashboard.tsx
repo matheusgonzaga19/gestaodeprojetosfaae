@@ -142,12 +142,12 @@ export default function Dashboard() {
 
   if (statsLoading || userStatsLoading || tasksLoading || projectsLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-8">
-          <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="p-3 sm:p-6">
+        <div className="animate-pulse space-y-6 sm:space-y-8">
+          <div className="h-24 sm:h-32 bg-gray-200 dark:bg-gray-700 rounded-2xl"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              <div key={i} className="h-24 sm:h-32 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -156,21 +156,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">Visão geral dos seus projetos e tarefas</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Visão geral dos seus projetos e tarefas</p>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full sm:w-auto">
           <Button
             onClick={generatePDFReport}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none"
           >
             <Download className="w-4 h-4 mr-2" />
-            Exportar PDF
+            <span className="hidden sm:inline">Exportar PDF</span>
+            <span className="sm:hidden">PDF</span>
           </Button>
         </div>
       </div>
@@ -178,19 +179,19 @@ export default function Dashboard() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
             Filtros
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
             {/* Date Range */}
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2 md:col-span-1">
               <label className="text-sm font-medium">Período</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left">
+                  <Button variant="outline" className="w-full justify-start text-left text-sm">
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateRange.from ? (
                       dateRange.to ? (
@@ -212,7 +213,7 @@ export default function Dashboard() {
                     defaultMonth={dateRange.from}
                     selected={dateRange}
                     onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
-                    numberOfMonths={2}
+                    numberOfMonths={window.innerWidth > 768 ? 2 : 1}
                   />
                 </PopoverContent>
               </Popover>
@@ -308,65 +309,65 @@ export default function Dashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Tarefas</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalTasks || 0}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total de Tarefas</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalTasks || 0}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-blue-600" />
+              <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Tarefas Concluídas</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.completedTasks || 0}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Tarefas Concluídas</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.completedTasks || 0}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-600" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Projetos Ativos</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.activeProjects || 0}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Projetos Ativos</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.activeProjects || 0}</p>
               </div>
-              <Users className="w-8 h-8 text-purple-600" />
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Horas Trabalhadas</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalHours || 0}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Horas Trabalhadas</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{dashboardStats?.totalHours || 0}</p>
               </div>
-              <Clock className="w-8 h-8 text-orange-600" />
+              <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Tasks by Status */}
         <Card>
           <CardHeader>
-            <CardTitle>Tarefas por Status</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Tarefas por Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -375,7 +376,7 @@ export default function Dashboard() {
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    outerRadius={window.innerWidth > 640 ? 80 : 60}
                     fill="#8884d8"
                     dataKey="value"
                   >

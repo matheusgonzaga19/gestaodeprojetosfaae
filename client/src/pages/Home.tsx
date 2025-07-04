@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Header from "@/components/Layout/Header";
+import MobileBottomNav from "@/components/Layout/MobileBottomNav";
 import Dashboard from "@/components/Dashboard/Dashboard";
 import KanbanBoard from "@/components/Kanban/KanbanBoard";
 import CalendarView from "@/components/Calendar/CalendarView";
@@ -85,9 +86,15 @@ export default function Home() {
         onSectionChange={setActiveSection} 
       />
       
-      <main className="transition-all duration-300">
+      <main className="transition-all duration-300 pb-16 lg:pb-0">
         {renderActiveSection()}
       </main>
+
+      <MobileBottomNav 
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        userRole={user.role}
+      />
     </div>
   );
 }

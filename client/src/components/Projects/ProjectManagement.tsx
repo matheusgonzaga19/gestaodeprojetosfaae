@@ -453,12 +453,12 @@ export default function ProjectManagement() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-8">
-          <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="p-3 sm:p-6">
+        <div className="animate-pulse space-y-6 sm:space-y-8">
+          <div className="h-12 sm:h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              <div key={i} className="h-48 sm:h-64 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -467,19 +467,20 @@ export default function ProjectManagement() {
   }
 
   return (
-    <div className="p-6 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="p-3 sm:p-6 space-y-6 sm:space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Projetos</h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h2 className="text-xl sm:text-2xl font-bold">Projetos</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Gerencie seus projetos arquitetônicos
           </p>
         </div>
         <ProjectModal
           trigger={
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Novo Projeto
+              <span className="hidden sm:inline">Novo Projeto</span>
+              <span className="sm:hidden">Novo</span>
             </Button>
           }
         />
@@ -508,7 +509,7 @@ export default function ProjectManagement() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {projects.map((project) => (
             <ProjectCard
               key={project.id}

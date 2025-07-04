@@ -106,12 +106,12 @@ export default function KanbanBoard() {
 
   if (tasksLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-8">
-          <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="p-3 sm:p-6">
+        <div className="animate-pulse space-y-6 sm:space-y-8">
+          <div className="h-12 sm:h-16 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-96 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              <div key={i} className="h-64 sm:h-96 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -120,15 +120,15 @@ export default function KanbanBoard() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-3 sm:p-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div>
-          <h2 className="text-2xl font-bold">Visão Kanban</h2>
-          <p className="text-gray-600 dark:text-gray-400">Gerencie suas tarefas com drag-and-drop</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Visão Kanban</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Gerencie suas tarefas com drag-and-drop</p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <Select value={selectedProject} onValueChange={setSelectedProject}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filtrar por projeto" />
             </SelectTrigger>
             <SelectContent>
@@ -142,7 +142,7 @@ export default function KanbanBoard() {
           </Select>
 
           <Select value={selectedUser} onValueChange={setSelectedUser}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Filtrar por usuário" />
             </SelectTrigger>
             <SelectContent>
@@ -170,19 +170,19 @@ export default function KanbanBoard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {KANBAN_COLUMNS.map((column) => {
           const columnTasks = getTasksByStatus(column.id);
           
           return (
             <div
               key={column.id}
-              className={`${column.color} rounded-xl p-6`}
+              className={`${column.color} rounded-xl p-4 sm:p-6`}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, column.id)}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="font-semibold text-sm sm:text-base text-gray-700 dark:text-gray-300">
                   {column.title}
                 </h3>
                 <span className={`${column.badgeColor} px-2 py-1 rounded-full text-xs`}>
