@@ -241,6 +241,10 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     <Button 
       size="sm" 
       className="bg-blue-600 hover:bg-blue-700"
+      onClick={() => {
+        console.log("🔄 Botão clicado - tentando abrir modal");
+        handleOpenChange(true);
+      }}
     >
       <Plus className="w-4 h-4 mr-2" />
       Adicionar Tarefa
