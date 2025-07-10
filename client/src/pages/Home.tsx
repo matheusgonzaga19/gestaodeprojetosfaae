@@ -10,7 +10,7 @@ import CalendarView from "@/components/Calendar/CalendarView";
 import FileManager from "@/components/Files/FileManager";
 import AIChat from "@/components/Chat/AIChat";
 import UserManagement from "@/components/Users/UserManagement";
-import ProjectManagement from "@/components/Projects/ProjectManagement";
+import ProjectsManager from "@/components/Projects/ProjectsManager";
 
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
@@ -64,7 +64,7 @@ export default function Home() {
       case 'kanban':
         return <KanbanBoard />;
       case 'projects':
-        return <ProjectManagement />;
+        return <ProjectsManager />;
       case 'calendar':
         return <CalendarView />;
       case 'files':

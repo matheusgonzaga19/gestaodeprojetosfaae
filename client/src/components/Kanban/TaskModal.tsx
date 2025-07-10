@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, Save, X } from "lucide-react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { TaskWithDetails, User, Project } from "@shared/schema";
 
 interface TaskModalProps {
@@ -53,6 +54,7 @@ export default function TaskModal({
   const [dueDate, setDueDate] = useState<string>("");
   const [estimatedHours, setEstimatedHours] = useState<string>("");
   const [actualHours, setActualHours] = useState<string>("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Data queries
   const { data: users = [] } = useQuery<User[]>({
@@ -218,9 +220,12 @@ export default function TaskModal({
   };
 
   const handleDelete = () => {
-    if (window.confirm("Tem certeza que deseja excluir esta tarefa?")) {
-      deleteTaskMutation.mutate();
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
+    deleteTaskMutation.mutate();
+    setShowDeleteConfirm(false);
   };
 
   const canEditTask = () => {
@@ -327,7 +332,6 @@ export default function TaskModal({
                 <SelectValue placeholder="Selecione um projeto" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem projeto</SelectItem>
                 {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
@@ -345,7 +349,6 @@ export default function TaskModal({
                 <SelectValue placeholder="Selecione um usuário" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Não atribuído</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {getUserDisplayName(user.id)}
@@ -420,6 +423,18 @@ export default function TaskModal({
           </div>
         </form>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Excluir Tarefa"
+        description={`Tem certeza que deseja excluir a tarefa "${task?.title}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        onConfirm={confirmDelete}
+        variant="destructive"
+      />
     </Dialog>
   );
 }
