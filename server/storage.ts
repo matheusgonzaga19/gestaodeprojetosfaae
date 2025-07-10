@@ -294,7 +294,7 @@ export class DatabaseStorage implements IStorage {
 
     const comments = await this.getTaskComments(id);
     const files = await this.getFilesByTaskId(id);
-    const timeEntries = await db
+    const taskTimeEntries = await db
       .select()
       .from(timeEntries)
       .where(eq(timeEntries.taskId, id));
@@ -303,7 +303,7 @@ export class DatabaseStorage implements IStorage {
       ...task,
       comments,
       files,
-      timeEntries,
+      timeEntries: taskTimeEntries,
     };
   }
 

@@ -257,60 +257,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const userId = getUserId(req);
-      const originalTask = await storage.getTaskById(id);
       
-      if (!originalTask) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-
+      // For fast drag and drop, we'll optimize by reducing database calls
       const validatedData = insertTaskSchema.partial().parse(req.body);
       const updatedTask = await storage.updateTask(id, validatedData);
 
-      // Add history entry for changes
-      const changes = [];
-      if (validatedData.status && validatedData.status !== originalTask.status) {
+      // Only add history for status changes (most important for kanban)
+      if (validatedData.status) {
         const statusLabels = {
           'aberta': 'Aberta',
           'em_andamento': 'Em Andamento',
           'concluida': 'Concluída',
           'cancelada': 'Cancelada'
         };
-        changes.push(`Status alterado de "${statusLabels[originalTask.status] || originalTask.status}" para "${statusLabels[validatedData.status] || validatedData.status}"`);
-      }
-      if (validatedData.priority && validatedData.priority !== originalTask.priority) {
-        const priorityLabels = {
-          'baixa': 'Baixa',
-          'media': 'Média',
-          'alta': 'Alta',
-          'critica': 'Crítica'
-        };
-        changes.push(`Prioridade alterada de "${priorityLabels[originalTask.priority] || originalTask.priority}" para "${priorityLabels[validatedData.priority] || validatedData.priority}"`);
-      }
-      if (validatedData.title && validatedData.title !== originalTask.title) {
-        changes.push(`Título alterado para "${validatedData.title}"`);
-      }
-      if (validatedData.assignedUserId !== originalTask.assignedUserId) {
-        changes.push(`Responsável alterado`);
-      }
-      if (validatedData.projectId !== originalTask.projectId) {
-        changes.push(`Projeto alterado`);
-      }
-      
-      if (changes.length > 0) {
-        await storage.addTaskHistory(id, userId, changes.join(', '));
-      }
-
-      // Create notification if status changed to completed
-      if (validatedData.status === 'concluida' && originalTask.status !== 'concluida') {
-        if (originalTask.assignedUserId) {
-          await storage.createNotification({
-            userId: originalTask.assignedUserId,
-            title: "Tarefa concluída",
-            message: `Parabéns! Você concluiu a tarefa: ${originalTask.title}`,
-            type: "success",
-            relatedTaskId: id,
-          });
-        }
+        await storage.addTaskHistory(id, userId, `Status alterado para "${statusLabels[validatedData.status] || validatedData.status}"`);
       }
 
       // Broadcast to all connected clients
