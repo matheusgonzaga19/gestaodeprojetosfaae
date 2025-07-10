@@ -74,6 +74,7 @@ export default function KanbanBoard() {
   const [draggedTask, setDraggedTask] = useState<TaskWithDetails | null>(null);
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
 
   // Fetch tasks
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithDetails[]>({
@@ -148,8 +149,22 @@ export default function KanbanBoard() {
     e.dataTransfer.dropEffect = "move";
   };
 
+  const handleDragEnter = (e: React.DragEvent, status: TaskStatus) => {
+    e.preventDefault();
+    setDragOverColumn(status);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    // Only clear if we're leaving the column area
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverColumn(null);
+    }
+  };
+
   const handleDrop = (e: React.DragEvent, targetStatus: TaskStatus) => {
     e.preventDefault();
+    setDragOverColumn(null);
     
     if (!draggedTask || draggedTask.status === targetStatus) {
       setDraggedTask(null);
@@ -232,8 +247,12 @@ export default function KanbanBoard() {
           return (
             <div
               key={column.id}
-              className={`${column.bgColor} rounded-lg border-2 border-dashed p-4 min-h-[500px]`}
+              className={`${column.bgColor} rounded-lg border-2 border-dashed p-4 min-h-[500px] transition-all duration-200 ${
+                dragOverColumn === column.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-lg' : ''
+              }`}
               onDragOver={handleDragOver}
+              onDragEnter={(e) => handleDragEnter(e, column.id)}
+              onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, column.id)}
             >
               {/* Column Header */}
@@ -254,7 +273,9 @@ export default function KanbanBoard() {
                 {columnTasks.map((task) => (
                   <Card
                     key={task.id}
-                    className="cursor-move hover:shadow-md transition-shadow bg-white dark:bg-gray-800"
+                    className={`cursor-move hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800 ${
+                      draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''
+                    }`}
                     draggable
                     onDragStart={(e) => handleDragStart(e, task)}
                     onClick={() => handleTaskClick(task)}
