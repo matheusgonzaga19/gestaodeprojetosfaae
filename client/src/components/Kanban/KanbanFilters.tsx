@@ -143,11 +143,17 @@ export default function KanbanFilters({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos os usuários</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.firstName} {user.lastName}
-                    </SelectItem>
-                  ))}
+                  {users
+                    .filter(user => user.id) // Garante que o usuário tem ID
+                    .map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName && user.lastName 
+                          ? `${user.firstName} ${user.lastName}` 
+                          : user.email?.split('@')[0] || `Usuário ${user.id}`
+                        }
+                      </SelectItem>
+                    ))
+                  }
                 </SelectContent>
               </Select>
             </div>

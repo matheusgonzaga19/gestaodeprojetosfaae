@@ -102,6 +102,9 @@ export default function KanbanBoard() {
     queryKey: ['/api/users'],
     retry: false,
   });
+  
+  // Debug: log users
+  console.log('👥 Usuários carregados:', users.length, users);
 
   // Update task status mutation
   const updateTaskStatusMutation = useMutation({
