@@ -114,14 +114,14 @@ export default function KanbanFilters({
             <div className="space-y-2">
               <Label>Projeto</Label>
               <Select
-                value={filters.projectId}
-                onValueChange={(value) => handleFilterChange('projectId', value)}
+                value={filters.projectId || "todos"}
+                onValueChange={(value) => handleFilterChange('projectId', value === 'todos' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os projetos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os projetos</SelectItem>
+                  <SelectItem value="todos">Todos os projetos</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id.toString()}>
                       {project.name}
@@ -135,14 +135,14 @@ export default function KanbanFilters({
             <div className="space-y-2">
               <Label>Responsável</Label>
               <Select
-                value={filters.assignedUserId}
-                onValueChange={(value) => handleFilterChange('assignedUserId', value)}
+                value={filters.assignedUserId || "todos"}
+                onValueChange={(value) => handleFilterChange('assignedUserId', value === 'todos' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os usuários" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os usuários</SelectItem>
+                  <SelectItem value="todos">Todos os usuários</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.firstName} {user.lastName}
@@ -156,14 +156,14 @@ export default function KanbanFilters({
             <div className="space-y-2">
               <Label>Prioridade</Label>
               <Select
-                value={filters.priority}
-                onValueChange={(value) => handleFilterChange('priority', value)}
+                value={filters.priority || "todas"}
+                onValueChange={(value) => handleFilterChange('priority', value === 'todas' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as prioridades" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas as prioridades</SelectItem>
+                  <SelectItem value="todas">Todas as prioridades</SelectItem>
                   {priorityOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -177,14 +177,14 @@ export default function KanbanFilters({
             <div className="space-y-2">
               <Label>Status</Label>
               <Select
-                value={filters.status}
-                onValueChange={(value) => handleFilterChange('status', value)}
+                value={filters.status || "todos"}
+                onValueChange={(value) => handleFilterChange('status', value === 'todos' ? '' : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todos os status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os status</SelectItem>
+                  <SelectItem value="todos">Todos os status</SelectItem>
                   {statusOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
