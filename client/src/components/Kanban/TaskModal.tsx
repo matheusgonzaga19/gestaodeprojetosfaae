@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +48,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const [priority, setPriority] = useState<"baixa" | "media" | "alta" | "critica">("media");
   const [status, setStatus] = useState<"aberta" | "em_andamento" | "concluida" | "cancelada">("aberta");
   const [projectId, setProjectId] = useState<string>("");
-  const [assignedUserId, setAssignedUserId] = useState<string>("");
+  const [assignedUserId, setAssignedUserId] = useState<string>("unassigned");
   const [dueDate, setDueDate] = useState<string>("");
   const [estimatedHours, setEstimatedHours] = useState<string>("");
   const [actualHours, setActualHours] = useState<string>("");
@@ -154,7 +155,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     setPriority("media");
     setStatus(defaultStatus as any || "aberta");
     setProjectId(defaultProjectId ? defaultProjectId.toString() : "");
-    setAssignedUserId("");
+    setAssignedUserId("unassigned");
     setDueDate("");
     setEstimatedHours("");
     setActualHours("");
@@ -175,7 +176,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       setPriority(task.priority || "media");
       setStatus(task.status || "aberta");
       setProjectId(task.projectId?.toString() || "");
-      setAssignedUserId(task.assignedUserId || "");
+      setAssignedUserId(task.assignedUserId || "unassigned");
       setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "");
       setEstimatedHours(task.estimatedHours?.toString() || "");
       setActualHours(task.actualHours?.toString() || "");
@@ -204,7 +205,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       priority,
       status,
       projectId: projectId && projectId !== "" ? parseInt(projectId) : null,
-      assignedUserId: assignedUserId && assignedUserId !== "" ? assignedUserId : user?.id || null,
+      assignedUserId: assignedUserId && assignedUserId !== "" && assignedUserId !== "unassigned" ? assignedUserId : user?.id || null,
       estimatedHours: estimatedHours && estimatedHours !== "" ? parseFloat(estimatedHours) : null,
       actualHours: actualHours && actualHours !== "" ? parseFloat(actualHours) : null,
       dueDate: dueDate && dueDate !== "" ? dueDate : null,
@@ -271,6 +272,9 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
               </Button>
             )}
           </DialogTitle>
+          <DialogDescription>
+            {task ? "Edite os detalhes da tarefa abaixo." : "Preencha as informações para criar uma nova tarefa."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -356,7 +360,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
                 <SelectValue placeholder="Selecione um usuário" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Não atribuído</SelectItem>
+                <SelectItem value="unassigned">Não atribuído</SelectItem>
                 {users.map((user: User) => (
                   <SelectItem key={user.id} value={user.id}>
                     {getUserDisplayName(user.id)}
