@@ -10,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, Download, Filter, TrendingUp, Users, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarIcon, Download, Filter, TrendingUp, Users, CheckCircle, Clock, ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import type { DashboardStats, UserStats } from "@/types";
