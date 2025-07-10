@@ -14,11 +14,15 @@ import { CalendarIcon, Download, Filter, TrendingUp, Users, CheckCircle, Clock, 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import jsPDF from 'jspdf';
 import type { DashboardStats, UserStats } from "@/types";
+import { PDFReportGenerator, type PDFReportData } from '@/utils/pdfGenerator';
+import type { ProjectWithTasks, TaskWithDetails, User } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { toast } = useToast();
   
   // Filters state
   const [filtersExpanded, setFiltersExpanded] = useState(false);
@@ -55,53 +59,146 @@ export default function Dashboard() {
     queryKey: ['/api/users'],
   });
 
-  // Generate PDF Report
-  const generatePDFReport = () => {
-    const doc = new jsPDF();
+  // Get active filters summary
+  const getActiveFiltersSummary = () => {
+    const activeFilters = [];
     
-    // Add title
-    doc.setFontSize(20);
-    doc.text('FAAE Projetos - Relatório Dashboard', 20, 20);
-    
-    // Add date
-    doc.setFontSize(12);
-    doc.text(`Data: ${format(new Date(), 'dd/MM/yyyy', { locale: ptBR })}`, 20, 30);
-    
-    // Add stats
-    doc.setFontSize(14);
-    doc.text('Estatísticas Gerais:', 20, 45);
-    doc.setFontSize(12);
-    doc.text(`Total de Tarefas: ${dashboardStats?.totalTasks || 0}`, 20, 55);
-    doc.text(`Tarefas Concluídas: ${dashboardStats?.completedTasks || 0}`, 20, 65);
-    doc.text(`Projetos Ativos: ${dashboardStats?.activeProjects || 0}`, 20, 75);
-    doc.text(`Horas Trabalhadas: ${Number(dashboardStats?.totalHours || 0).toFixed(2)}`, 20, 85);
-    doc.text(`Eficiência: ${dashboardStats?.efficiency || 0}%`, 20, 95);
-    
-    // Add user stats if available
-    if (userStats) {
-      doc.setFontSize(14);
-      doc.text('Suas Estatísticas:', 20, 115);
-      doc.setFontSize(12);
-      doc.text(`Suas Tarefas: ${userStats.taskCount || 0}`, 20, 125);
-      doc.text(`Concluídas: ${userStats.completedTaskCount || 0}`, 20, 135);
-      doc.text(`Horas Trabalhadas: ${Number(userStats.hoursWorked || 0).toFixed(2)}`, 20, 145);
-      doc.text(`Sua Eficiência: ${userStats.efficiency || 0}%`, 20, 155);
+    if (selectedProject !== 'all') {
+      const project = projects.find(p => p.id === Number(selectedProject));
+      activeFilters.push(`Projeto: ${project?.name || 'N/A'}`);
     }
     
-    // Add tasks summary
-    if (tasks.length > 0) {
-      doc.setFontSize(14);
-      doc.text('Resumo de Tarefas:', 20, 175);
-      doc.setFontSize(10);
-      
-      let y = 185;
-      tasks.slice(0, 10).forEach((task: any, index: number) => {
-        doc.text(`${index + 1}. ${task.title} - ${task.status}`, 20, y);
-        y += 10;
+    if (selectedUser !== 'all') {
+      const user = users.find(u => u.id === selectedUser);
+      activeFilters.push(`Responsável: ${user?.firstName || 'N/A'} ${user?.lastName || ''}`);
+    }
+    
+    if (selectedStatus !== 'all') {
+      const statusLabels = {
+        'aberta': 'Aberta',
+        'em_andamento': 'Em Andamento',
+        'concluida': 'Concluída',
+        'cancelada': 'Cancelada'
+      };
+      activeFilters.push(`Status: ${statusLabels[selectedStatus as keyof typeof statusLabels] || selectedStatus}`);
+    }
+    
+    if (selectedPriority !== 'all') {
+      const priorityLabels = {
+        'baixa': 'Baixa',
+        'media': 'Média',
+        'alta': 'Alta',
+        'critica': 'Crítica'
+      };
+      activeFilters.push(`Prioridade: ${priorityLabels[selectedPriority as keyof typeof priorityLabels] || selectedPriority}`);
+    }
+    
+    if (dateRange.from && dateRange.to) {
+      activeFilters.push(`Período: ${format(dateRange.from, 'dd/MM/yyyy', { locale: ptBR })} - ${format(dateRange.to, 'dd/MM/yyyy', { locale: ptBR })}`);
+    }
+    
+    return activeFilters;
+  };
+
+  // Filter data based on current filters
+  const getFilteredData = () => {
+    let filteredTasks = [...tasks];
+    let filteredProjects = [...projects];
+
+    // Apply date range filter
+    if (dateRange.from && dateRange.to) {
+      filteredTasks = filteredTasks.filter(task => {
+        const taskDate = new Date(task.createdAt);
+        return taskDate >= dateRange.from! && taskDate <= dateRange.to!;
       });
     }
-    
-    doc.save('relatorio-dashboard.pdf');
+
+    // Apply user filter
+    if (selectedUser !== 'all') {
+      filteredTasks = filteredTasks.filter(task => task.assignedUserId === selectedUser);
+    }
+
+    // Apply priority filter
+    if (selectedPriority !== 'all') {
+      filteredTasks = filteredTasks.filter(task => task.priority === selectedPriority);
+    }
+
+    // Apply status filter
+    if (selectedStatus !== 'all') {
+      filteredTasks = filteredTasks.filter(task => task.status === selectedStatus);
+    }
+
+    // Apply project filter
+    if (selectedProject !== 'all') {
+      const projectId = Number(selectedProject);
+      filteredTasks = filteredTasks.filter(task => task.projectId === projectId);
+      filteredProjects = filteredProjects.filter(project => project.id === projectId);
+    } else {
+      // If no specific project filter, only include projects that have tasks
+      const projectIdsWithTasks = [...new Set(filteredTasks.map(task => task.projectId))];
+      filteredProjects = filteredProjects.filter(project => 
+        projectIdsWithTasks.includes(project.id)
+      );
+    }
+
+    // Add tasks to their respective projects
+    filteredProjects = filteredProjects.map(project => ({
+      ...project,
+      tasks: filteredTasks.filter(task => task.projectId === project.id)
+    }));
+
+    return {
+      tasks: filteredTasks,
+      projects: filteredProjects
+    };
+  };
+
+  // Generate PDF Report based on applied filters
+  const generatePDFReport = () => {
+    try {
+      toast({
+        title: "Gerando relatório...",
+        description: "Processando dados para exportação em PDF",
+      });
+
+      // Apply filters to get the filtered data
+      const filteredData = getFilteredData();
+      
+      // Prepare PDF report data
+      const reportData: PDFReportData = {
+        projects: filteredData.projects as ProjectWithTasks[],
+        tasks: filteredData.tasks as TaskWithDetails[],
+        users: users as User[],
+        appliedFilters: {
+          projectId: selectedProject !== 'all' ? Number(selectedProject) : undefined,
+          assignedUserId: selectedUser !== 'all' ? selectedUser : undefined,
+          status: selectedStatus !== 'all' ? selectedStatus : undefined,
+          priority: selectedPriority !== 'all' ? selectedPriority : undefined,
+          dateRange: dateRange.from && dateRange.to ? {
+            from: dateRange.from,
+            to: dateRange.to
+          } : undefined
+        },
+        exportDate: new Date()
+      };
+
+      // Generate the PDF
+      const generator = new PDFReportGenerator();
+      generator.generateReport(reportData);
+
+      toast({
+        title: "Relatório gerado com sucesso!",
+        description: `Exportado ${reportData.projects.length} projetos e ${reportData.tasks.length} tarefas`,
+      });
+
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      toast({
+        title: "Erro ao gerar relatório",
+        description: "Ocorreu um erro durante a geração do PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   // Chart data processing
@@ -169,9 +266,11 @@ export default function Dashboard() {
           <Button
             onClick={generatePDFReport}
             className="bg-blue-600 hover:bg-blue-700 text-white flex-1 sm:flex-none px-3 sm:px-4 py-2 text-sm"
+            title="Exportar relatório PDF com base nos filtros aplicados"
           >
             <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-            <span className="hidden sm:inline">Exportar PDF</span>
+            <span className="hidden lg:inline">Exportar Relatório PDF</span>
+            <span className="lg:hidden sm:inline">Relatório PDF</span>
             <span className="sm:hidden">PDF</span>
           </Button>
         </div>
@@ -320,6 +419,44 @@ export default function Dashboard() {
         </CardContent>
         </div>
       </Card>
+
+      {/* Active Filters Summary */}
+      {getActiveFiltersSummary().length > 0 && (
+        <Card className="border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Relatório PDF será gerado com os seguintes filtros:
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex flex-wrap gap-2">
+              {getActiveFiltersSummary().map((filter, index) => (
+                <Badge key={index} variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200">
+                  {filter}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-orange-700 dark:text-orange-300 mt-2">
+              💡 O relatório incluirá apenas os dados que correspondem aos filtros acima
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* No Filters Message */}
+      {getActiveFiltersSummary().length === 0 && (
+        <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+              <FileText className="w-4 h-4" />
+              <span className="text-sm font-medium">
+                O relatório PDF será gerado com TODOS os projetos e tarefas (sem filtros aplicados)
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
