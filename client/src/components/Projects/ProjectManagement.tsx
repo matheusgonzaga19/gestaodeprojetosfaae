@@ -115,7 +115,7 @@ function ProjectModal({ project, trigger }: ProjectModalProps) {
       budget: formData.budget ? parseFloat(formData.budget) : null,
       startDate: formData.startDate || null,
       endDate: formData.endDate || null,
-      createdUserId: user?.id,
+      managerUserId: user?.id,
     };
 
     createProjectMutation.mutate(projectData);
