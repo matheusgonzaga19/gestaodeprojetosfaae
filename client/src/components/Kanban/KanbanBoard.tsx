@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { TaskWithDetails, Project, User as UserType } from "@shared/schema";
 import TaskModal from "./TaskModal";
+import KanbanFilters from "./KanbanFilters";
 
 type TaskStatus = "aberta" | "em_andamento" | "concluida" | "cancelada";
 
@@ -75,6 +76,16 @@ export default function KanbanBoard() {
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+  const [filters, setFilters] = useState({
+    search: '',
+    projectId: '',
+    assignedUserId: '',
+    priority: '',
+    status: '',
+    dateFrom: '',
+    dateTo: ''
+  });
 
   // Fetch tasks
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithDetails[]>({
@@ -134,8 +145,76 @@ export default function KanbanBoard() {
     return project?.name || 'Sem projeto';
   };
 
+  // Filter tasks based on current filters
+  const filterTasks = (tasks: TaskWithDetails[]) => {
+    return tasks.filter(task => {
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          task.title.toLowerCase().includes(searchLower) ||
+          task.description?.toLowerCase().includes(searchLower) ||
+          getProjectName(task.projectId).toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      // Project filter
+      if (filters.projectId && task.projectId.toString() !== filters.projectId) {
+        return false;
+      }
+
+      // Assigned user filter
+      if (filters.assignedUserId && task.assignedUserId !== filters.assignedUserId) {
+        return false;
+      }
+
+      // Priority filter
+      if (filters.priority && task.priority !== filters.priority) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.status && task.status !== filters.status) {
+        return false;
+      }
+
+      // Date from filter
+      if (filters.dateFrom && task.startDate) {
+        const taskDate = new Date(task.startDate);
+        const filterDate = new Date(filters.dateFrom);
+        if (taskDate < filterDate) return false;
+      }
+
+      // Date to filter
+      if (filters.dateTo && task.dueDate) {
+        const taskDate = new Date(task.dueDate);
+        const filterDate = new Date(filters.dateTo);
+        if (taskDate > filterDate) return false;
+      }
+
+      return true;
+    });
+  };
+
   const getTasksByStatus = (status: TaskStatus) => {
-    return tasks.filter(task => task.status === status);
+    const filteredTasks = filterTasks(tasks);
+    return filteredTasks.filter(task => task.status === status);
+  };
+
+  const handleFiltersChange = (newFilters: typeof filters) => {
+    setFilters(newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: '',
+      projectId: '',
+      assignedUserId: '',
+      priority: '',
+      status: '',
+      dateFrom: '',
+      dateTo: ''
+    });
   };
 
   // Drag and drop handlers
@@ -238,6 +317,29 @@ export default function KanbanBoard() {
           Nova Tarefa
         </Button>
       </div>
+
+      {/* Filters */}
+      <KanbanFilters
+        projects={projects}
+        users={users}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={handleClearFilters}
+        isCollapsed={filtersCollapsed}
+        onToggleCollapse={() => setFiltersCollapsed(!filtersCollapsed)}
+      />
+
+      {/* Filter Results Counter */}
+      {Object.values(filters).some(value => value && value.trim() !== '') && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-blue-600" />
+            <span className="text-sm text-blue-700 dark:text-blue-300">
+              Mostrando {filterTasks(tasks).length} de {tasks.length} tarefas
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
