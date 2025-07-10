@@ -291,7 +291,12 @@ function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; 
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm("Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.")) {
+    const taskCount = project.tasks?.length || 0;
+    const message = taskCount > 0 
+      ? `Tem certeza que deseja excluir este projeto? Esta ação irá excluir permanentemente:\n\n• O projeto "${project.name}"\n• ${taskCount} tarefa(s) vinculada(s)\n• Todos os arquivos e comentários relacionados\n\nEsta ação não pode ser desfeita.`
+      : `Tem certeza que deseja excluir o projeto "${project.name}"? Esta ação não pode ser desfeita.`;
+    
+    if (window.confirm(message)) {
       deleteProjectMutation.mutate();
     }
   };

@@ -76,7 +76,7 @@ export default function KanbanBoard() {
   const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [dragOverColumn, setDragOverColumn] = useState<TaskStatus | null>(null);
-  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
     projectId: '',

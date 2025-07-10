@@ -68,7 +68,7 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   status: varchar("status", { enum: ["aberta", "em_andamento", "concluida", "cancelada"] }).notNull().default("aberta"),
   priority: varchar("priority", { enum: ["baixa", "media", "alta", "critica"] }).notNull().default("media"),
-  projectId: integer("project_id").references(() => projects.id),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: 'cascade' }),
   assignedUserId: varchar("assigned_user_id").references(() => users.id),
   createdUserId: varchar("created_user_id").references(() => users.id),
   startDate: date("start_date"),
@@ -82,7 +82,7 @@ export const tasks = pgTable("tasks", {
 
 export const taskComments = pgTable("task_comments", {
   id: serial("id").primaryKey(),
-  taskId: integer("task_id").references(() => tasks.id).notNull(),
+  taskId: integer("task_id").references(() => tasks.id, { onDelete: 'cascade' }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -90,7 +90,7 @@ export const taskComments = pgTable("task_comments", {
 
 export const taskHistory = pgTable("task_history", {
   id: serial("id").primaryKey(),
-  taskId: integer("task_id").references(() => tasks.id).notNull(),
+  taskId: integer("task_id").references(() => tasks.id, { onDelete: 'cascade' }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   changes: text("changes").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -103,8 +103,8 @@ export const files = pgTable("files", {
   mimeType: varchar("mime_type", { length: 100 }).notNull(),
   size: integer("size").notNull(),
   path: varchar("path", { length: 500 }).notNull(),
-  taskId: integer("task_id").references(() => tasks.id),
-  projectId: integer("project_id").references(() => projects.id),
+  taskId: integer("task_id").references(() => tasks.id, { onDelete: 'cascade' }),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: 'cascade' }),
   uploadedUserId: varchar("uploaded_user_id").references(() => users.id).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -116,14 +116,14 @@ export const notifications = pgTable("notifications", {
   message: text("message").notNull(),
   type: varchar("type", { enum: ["info", "warning", "error", "success"] }).notNull().default("info"),
   isRead: boolean("is_read").notNull().default(false),
-  relatedTaskId: integer("related_task_id").references(() => tasks.id),
-  relatedProjectId: integer("related_project_id").references(() => projects.id),
+  relatedTaskId: integer("related_task_id").references(() => tasks.id, { onDelete: 'cascade' }),
+  relatedProjectId: integer("related_project_id").references(() => projects.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const timeEntries = pgTable("time_entries", {
   id: serial("id").primaryKey(),
-  taskId: integer("task_id").references(() => tasks.id).notNull(),
+  taskId: integer("task_id").references(() => tasks.id, { onDelete: 'cascade' }).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time"),
