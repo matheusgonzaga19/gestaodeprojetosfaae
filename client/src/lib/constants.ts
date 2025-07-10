@@ -23,7 +23,7 @@ export const USER_ROLES = {
 
 export const PROJECT_TYPES = {
   STAND_IMOBILIARIO: 'stand_imobiliario',
-  PROJETO_ARQUITETONICO: 'projeto_arquitetonico',
+  PROJETO_ARQUITETURA: 'projeto_arquitetura',
   PROJETO_ESTRUTURAL: 'projeto_estrutural',
   REFORMA: 'reforma',
   MANUTENCAO: 'manutencao',

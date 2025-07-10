@@ -55,7 +55,7 @@ export default function HeroSection() {
             
             <p className="text-xl text-blue-100 mb-8 leading-relaxed">
               Oferecemos soluções personalizadas e inovadoras para apresentação de empreendimentos, 
-              com projetos arquitetônicos funcionais e modelos detalhados em 3D.
+              com projetos de arquitetura funcionais e modelos detalhados em 3D.
             </p>
             
             <div className="flex flex-wrap gap-4 mb-8">

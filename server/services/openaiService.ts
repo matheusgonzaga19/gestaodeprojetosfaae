@@ -26,7 +26,7 @@ class OpenAIService {
       ).join('\n');
 
       const prompt = `
-        Você é um assistente especializado em gerenciamento de projetos arquitetônicos.
+        Você é um assistente especializado em gerenciamento de projetos de arquitetura.
         Aqui está a lista de tarefas disponíveis:
         ${taskContext}
         
@@ -90,11 +90,11 @@ class OpenAIService {
 
     try {
       const prompt = `
-        Você é um especialista em gerenciamento de projetos arquitetônicos.
+        Você é um especialista em gerenciamento de projetos de arquitetura.
         Gere ${taskCount} sugestões de tarefas para um projeto chamado "${projectName}".
         
         Retorne apenas uma lista de títulos de tarefas, uma por linha, sem numeração.
-        Foque em tarefas típicas de projetos arquitetônicos brasileiros.
+        Foque em tarefas típicas de projetos de arquitetura brasileiros.
       `;
 
       const completion = await openai.chat.completions.create({

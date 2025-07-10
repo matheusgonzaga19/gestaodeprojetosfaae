@@ -58,7 +58,7 @@ export default function Landing() {
                 <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
                   Sistema Completo para{" "}
                   <span className="text-yellow-300">Gestão de Projetos</span>{" "}
-                  Arquitetônicos
+                  de Arquitetura
                 </h1>
                 
                 <p className="text-xl text-blue-100 mb-8 leading-relaxed">

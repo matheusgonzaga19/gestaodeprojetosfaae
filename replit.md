@@ -115,7 +115,7 @@ Changelog:
 - June 30, 2025. Initial setup
 - June 30, 2025. Enhanced FAAE Projetos system with:
   - FAAE branding and visual identity
-  - Project management for architectural stands and constructions
+  - Project management for arquitetura stands and constructions
   - Enhanced database schema with project teams, portfolios, and time tracking
   - Professional landing page with FAAE design elements
   - Comprehensive user roles (admin, project_manager, architects, budget_specialist)

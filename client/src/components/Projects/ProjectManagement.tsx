@@ -167,7 +167,7 @@ function ProjectModal({ project, trigger }: ProjectModalProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="stand_imobiliario">Stand Imobiliário</SelectItem>
-                  <SelectItem value="projeto_arquitetonico">Projeto Arquitetônico</SelectItem>
+                  <SelectItem value="projeto_arquitetura">Projeto de Arquitetura</SelectItem>
                   <SelectItem value="projeto_estrutural">Projeto Estrutural</SelectItem>
                   <SelectItem value="reforma">Reforma</SelectItem>
                   <SelectItem value="manutencao">Manutenção</SelectItem>
@@ -323,7 +323,7 @@ function ProjectCard({ project, onSelectProject }: { project: ProjectWithTasks; 
   const getTypeLabel = (type: string) => {
     const labels = {
       stand_imobiliario: "Stand Imobiliário",
-      projeto_arquitetonico: "Projeto Arquitetônico",
+      projeto_arquitetura: "Projeto de Arquitetura",
       projeto_estrutural: "Projeto Estrutural",
       reforma: "Reforma",
       manutencao: "Manutenção",

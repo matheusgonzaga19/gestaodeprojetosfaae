@@ -44,7 +44,7 @@ export const projects = pgTable("projects", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
   status: varchar("status", { enum: ["active", "completed", "on_hold", "cancelled"] }).notNull().default("active"),
-  type: varchar("type", { enum: ["stand_imobiliario", "projeto_arquitetonico", "projeto_estrutural", "reforma", "manutencao"] }).notNull().default("stand_imobiliario"),
+  type: varchar("type", { enum: ["stand_imobiliario", "projeto_arquitetura", "projeto_estrutural", "reforma", "manutencao"] }).notNull().default("stand_imobiliario"),
   stage: varchar("stage", { enum: ["briefing", "conceito", "projeto", "aprovacao", "orcamento", "producao", "entrega"] }).notNull().default("briefing"),
   priority: varchar("priority", { enum: ["baixa", "media", "alta", "urgente"] }).notNull().default("media"),
   startDate: date("start_date"),

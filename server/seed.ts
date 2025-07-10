@@ -23,7 +23,7 @@ async function seed() {
         createdUserId: '1' // Will be replaced by actual user ID when they login
       },
       {
-        name: 'Projeto Arquitetônico Residencial Villa Mar',
+        name: 'Projeto de Arquitetura Residencial Villa Mar',
         description: 'Casa de alto padrão com 4 suítes e área de lazer completa',
         status: 'active',
         priority: 'media',
