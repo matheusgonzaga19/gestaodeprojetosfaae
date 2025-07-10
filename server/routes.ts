@@ -489,13 +489,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User management routes (Admin only)
   app.get('/api/users', isAuthenticated, async (req, res) => {
     try {
-      const currentUser = await storage.getUser(getUserId(req));
-      if (!currentUser || currentUser.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
+      // Allow all authenticated users to see the user list (for task assignment)
       const users = await storage.getAllUsers();
-      res.json(users);
+      
+      // Return basic user info only (no sensitive data)
+      const safeUsers = users.map(user => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        role: user.role,
+      }));
+      
+      res.json(safeUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
