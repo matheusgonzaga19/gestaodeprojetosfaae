@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -23,24 +22,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarIcon, Plus, Edit, Trash2, X } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Trash2, Save, X } from "lucide-react";
 import type { TaskWithDetails, User, Project } from "@shared/schema";
 
 interface TaskModalProps {
-  task?: TaskWithDetails;
-  trigger?: React.ReactNode;
+  task?: TaskWithDetails | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   defaultStatus?: string;
   defaultProjectId?: number;
 }
 
-export default function TaskModal({ task, trigger, open, onOpenChange, defaultStatus, defaultProjectId }: TaskModalProps) {
+export default function TaskModal({ 
+  task, 
+  open = false, 
+  onOpenChange, 
+  defaultStatus = "aberta",
+  defaultProjectId 
+}: TaskModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
   
   // Form state
   const [title, setTitle] = useState("");
@@ -48,7 +49,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   const [priority, setPriority] = useState<"baixa" | "media" | "alta" | "critica">("media");
   const [status, setStatus] = useState<"aberta" | "em_andamento" | "concluida" | "cancelada">("aberta");
   const [projectId, setProjectId] = useState<string>("");
-  const [assignedUserId, setAssignedUserId] = useState<string>("unassigned");
+  const [assignedUserId, setAssignedUserId] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [estimatedHours, setEstimatedHours] = useState<string>("");
   const [actualHours, setActualHours] = useState<string>("");
@@ -56,33 +57,33 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   // Data queries
   const { data: users = [] } = useQuery<User[]>({
     queryKey: ['/api/users'],
+    retry: false,
   });
 
   const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
   });
 
-  // Mutations
+  // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("📤 Enviando dados da tarefa:", data);
-      const result = await apiRequest('POST', '/api/tasks', data);
-      console.log("✅ Tarefa criada com sucesso:", result);
-      return result;
+      console.log("📤 Criando tarefa:", data);
+      return await apiRequest('POST', '/api/tasks', data);
     },
-    onSuccess: () => {
+    onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
+      
       toast({
-        title: "Tarefa criada",
-        description: "A tarefa foi criada com sucesso.",
+        title: "Tarefa criada com sucesso",
+        description: `A tarefa "${newTask.title}" foi criada na coluna Abertas.`,
       });
-      handleOpenChange(false);
-      resetForm();
+      
+      handleClose();
     },
     onError: (error: any) => {
-      console.error("Erro ao criar tarefa:", error);
+      console.error("❌ Erro ao criar tarefa:", error);
       toast({
         title: "Erro ao criar tarefa",
         description: error.message || "Erro desconhecido",
@@ -91,21 +92,26 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
   });
 
+  // Update task mutation
   const updateTaskMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("📤 Atualizando tarefa:", data);
       return await apiRequest('PUT', `/api/tasks/${task?.id}`, data);
     },
-    onSuccess: () => {
+    onSuccess: (updatedTask) => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
+      
       toast({
         title: "Tarefa atualizada",
-        description: "A tarefa foi atualizada com sucesso.",
+        description: `A tarefa "${updatedTask.title}" foi atualizada.`,
       });
-      handleOpenChange(false);
+      
+      handleClose();
     },
     onError: (error: any) => {
+      console.error("❌ Erro ao atualizar tarefa:", error);
       toast({
         title: "Erro ao atualizar tarefa",
         description: error.message || "Erro desconhecido",
@@ -114,6 +120,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
   });
 
+  // Delete task mutation
   const deleteTaskMutation = useMutation({
     mutationFn: async () => {
       return await apiRequest('DELETE', `/api/tasks/${task?.id}`);
@@ -122,11 +129,13 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/stats'] });
       queryClient.invalidateQueries({ queryKey: ['/api/dashboard/user-stats'] });
+      
       toast({
         title: "Tarefa excluída",
         description: "A tarefa foi excluída com sucesso.",
       });
-      handleOpenChange(false);
+      
+      handleClose();
     },
     onError: (error: any) => {
       toast({
@@ -137,53 +146,41 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
     },
   });
 
-  // Handle modal open/close
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (onOpenChange) {
-      onOpenChange(open);
-    }
-    if (!open) {
-      resetForm();
-    }
-  };
-
   // Reset form
   const resetForm = () => {
     setTitle("");
     setDescription("");
     setPriority("media");
-    setStatus(defaultStatus as any || "aberta");
+    setStatus(defaultStatus as any);
     setProjectId(defaultProjectId ? defaultProjectId.toString() : "");
-    setAssignedUserId("unassigned");
+    setAssignedUserId("");
     setDueDate("");
     setEstimatedHours("");
     setActualHours("");
   };
 
-  // Sync external open prop with internal state
-  useEffect(() => {
-    if (open !== undefined) {
-      setIsOpen(open);
-    }
-  }, [open]);
+  // Handle close
+  const handleClose = () => {
+    resetForm();
+    onOpenChange?.(false);
+  };
 
   // Load task data when editing
   useEffect(() => {
-    if (task && isOpen) {
+    if (task && open) {
       setTitle(task.title || "");
       setDescription(task.description || "");
       setPriority(task.priority || "media");
       setStatus(task.status || "aberta");
       setProjectId(task.projectId?.toString() || "");
-      setAssignedUserId(task.assignedUserId || "unassigned");
-      setDueDate(task.dueDate ? format(new Date(task.dueDate), 'yyyy-MM-dd') : "");
+      setAssignedUserId(task.assignedUserId || "");
+      setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : "");
       setEstimatedHours(task.estimatedHours?.toString() || "");
       setActualHours(task.actualHours?.toString() || "");
-    } else if (!task && isOpen) {
+    } else if (!task && open) {
       resetForm();
     }
-  }, [task, isOpen, defaultStatus]);
+  }, [task, open, defaultStatus, defaultProjectId]);
 
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -205,11 +202,13 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
       priority,
       status,
       projectId: projectId && projectId !== "" ? parseInt(projectId) : null,
-      assignedUserId: assignedUserId && assignedUserId !== "" && assignedUserId !== "unassigned" ? assignedUserId : user?.id || null,
+      assignedUserId: assignedUserId && assignedUserId !== "" ? assignedUserId : null,
       estimatedHours: estimatedHours && estimatedHours !== "" ? parseFloat(estimatedHours) : null,
       actualHours: actualHours && actualHours !== "" ? parseFloat(actualHours) : null,
       dueDate: dueDate && dueDate !== "" ? dueDate : null,
     };
+
+    console.log("📝 Dados da tarefa:", taskData);
 
     if (task) {
       updateTaskMutation.mutate(taskData);
@@ -231,32 +230,17 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
   };
 
   const getUserDisplayName = (userId: string) => {
-    const foundUser = users.find((u: User) => u.id === userId);
+    const foundUser = users.find(u => u.id === userId);
     if (foundUser?.firstName && foundUser?.lastName) {
       return `${foundUser.firstName} ${foundUser.lastName}`;
     }
     return foundUser?.email || 'Usuário';
   };
 
-  const triggerButton = trigger || (
-    <Button 
-      size="sm" 
-      className="bg-blue-600 hover:bg-blue-700"
-      onClick={() => {
-        console.log("🔄 Botão clicado - tentando abrir modal");
-        handleOpenChange(true);
-      }}
-    >
-      <Plus className="w-4 h-4 mr-2" />
-      Adicionar Tarefa
-    </Button>
-  );
+  const isLoading = createTaskMutation.isPending || updateTaskMutation.isPending || deleteTaskMutation.isPending;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {triggerButton}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
@@ -266,6 +250,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
+                disabled={isLoading}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
                 <Trash2 className="w-4 h-4" />
@@ -305,7 +290,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
           {/* Priority */}
           <div className="space-y-2">
             <Label htmlFor="priority">Prioridade</Label>
-            <Select value={priority} onValueChange={(value: any) => setPriority(value)}>
+            <Select value={priority} onValueChange={setPriority}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a prioridade" />
               </SelectTrigger>
@@ -321,7 +306,7 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
           {/* Status */}
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+            <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
@@ -339,11 +324,11 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
             <Label htmlFor="project">Projeto</Label>
             <Select value={projectId} onValueChange={setProjectId}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um projeto (opcional)" />
+                <SelectValue placeholder="Selecione um projeto" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum projeto</SelectItem>
-                {projects.map((project: Project) => (
+                <SelectItem value="">Sem projeto</SelectItem>
+                {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
                   </SelectItem>
@@ -354,14 +339,14 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
 
           {/* Assigned User */}
           <div className="space-y-2">
-            <Label htmlFor="assigned">Atribuído para</Label>
+            <Label htmlFor="assignedUser">Responsável</Label>
             <Select value={assignedUserId} onValueChange={setAssignedUserId}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um usuário" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unassigned">Não atribuído</SelectItem>
-                {users.map((user: User) => (
+                <SelectItem value="">Não atribuído</SelectItem>
+                {users.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {getUserDisplayName(user.id)}
                   </SelectItem>
@@ -407,12 +392,6 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
               onChange={(e) => setActualHours(e.target.value)}
               placeholder="0.0"
             />
-            {actualHours && estimatedHours && Number(actualHours) > Number(estimatedHours) && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center">
-                <i className="fas fa-exclamation-triangle mr-1"></i>
-                Horas trabalhadas excedem as estimadas
-              </p>
-            )}
           </div>
 
           {/* Form Actions */}
@@ -420,16 +399,19 @@ export default function TaskModal({ task, trigger, open, onOpenChange, defaultSt
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleOpenChange(false)}
+              onClick={handleClose}
+              disabled={isLoading}
             >
+              <X className="w-4 h-4 mr-2" />
               Cancelar
             </Button>
             <Button
               type="submit"
-              disabled={createTaskMutation.isPending || updateTaskMutation.isPending}
+              disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {createTaskMutation.isPending || updateTaskMutation.isPending
+              <Save className="w-4 h-4 mr-2" />
+              {isLoading
                 ? "Salvando..."
                 : task
                 ? "Atualizar"

@@ -267,10 +267,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedTask = await storage.updateTask(id, validatedData);
 
       // Add history entry for changes
-      const changes = Object.keys(validatedData)
-        .map(key => `${key} alterado`)
-        .join(', ');
-      await storage.addTaskHistory(id, userId, changes);
+      const changes = [];
+      if (validatedData.status && validatedData.status !== originalTask.status) {
+        const statusLabels = {
+          'aberta': 'Aberta',
+          'em_andamento': 'Em Andamento',
+          'concluida': 'Concluída',
+          'cancelada': 'Cancelada'
+        };
+        changes.push(`Status alterado de "${statusLabels[originalTask.status] || originalTask.status}" para "${statusLabels[validatedData.status] || validatedData.status}"`);
+      }
+      if (validatedData.priority && validatedData.priority !== originalTask.priority) {
+        const priorityLabels = {
+          'baixa': 'Baixa',
+          'media': 'Média',
+          'alta': 'Alta',
+          'critica': 'Crítica'
+        };
+        changes.push(`Prioridade alterada de "${priorityLabels[originalTask.priority] || originalTask.priority}" para "${priorityLabels[validatedData.priority] || validatedData.priority}"`);
+      }
+      if (validatedData.title && validatedData.title !== originalTask.title) {
+        changes.push(`Título alterado para "${validatedData.title}"`);
+      }
+      if (validatedData.assignedUserId !== originalTask.assignedUserId) {
+        changes.push(`Responsável alterado`);
+      }
+      if (validatedData.projectId !== originalTask.projectId) {
+        changes.push(`Projeto alterado`);
+      }
+      
+      if (changes.length > 0) {
+        await storage.addTaskHistory(id, userId, changes.join(', '));
+      }
 
       // Create notification if status changed to completed
       if (validatedData.status === 'concluida' && originalTask.status !== 'concluida') {
