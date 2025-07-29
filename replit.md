@@ -18,8 +18,8 @@ FAAE Projetos is a comprehensive task management platform specifically designed 
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Replit Auth with OpenID Connect
-- **Session Management**: PostgreSQL-based session store
+- **Authentication**: Firebase Authentication (Google)
+- **Session Management**: Token based via Firebase ID tokens
 - **Real-time Communication**: WebSocket for live updates
 - **File Handling**: Multer for file uploads with local storage
 
@@ -34,8 +34,8 @@ FAAE Projetos is a comprehensive task management platform specifically designed 
 ## Key Components
 
 ### Authentication System
-- **Provider**: Replit Auth integration
-- **Session Management**: Secure session handling with PostgreSQL storage
+- **Provider**: Firebase Google sign-in
+- **Session Management**: ID token validation on each request
 - **Role-based Access**: Admin and collaborator roles with different permissions
 - **Security**: HTTPS-only cookies with proper session timeout
 
@@ -64,7 +64,7 @@ FAAE Projetos is a comprehensive task management platform specifically designed 
 
 ## Data Flow
 
-1. **Authentication Flow**: User authenticates via Replit Auth → Server validates session → Client receives user data
+1. **Authentication Flow**: User signs in with Google using Firebase → Client sends ID token → Server verifies token and returns user data
 2. **Task Operations**: Client sends request → Server validates permissions → Database update → WebSocket broadcast → UI update
 3. **File Upload**: Client uploads file → Server processes with Multer → Database metadata storage → File system storage
 4. **AI Search**: User query → Server forwards to OpenAI → Response processing → Formatted results returned
@@ -105,7 +105,7 @@ FAAE Projetos is a comprehensive task management platform specifically designed 
 
 ### Environment Configuration
 - **Database**: PostgreSQL connection via DATABASE_URL
-- **Authentication**: Replit Auth configuration
+ - **Authentication**: Firebase credentials configuration
 - **AI Services**: OpenAI API key configuration
 - **Session Security**: Secure session secret
 

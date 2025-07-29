@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./firebaseAuth";
 import { openaiService } from "./services/openaiService";
 import { fileService } from "./services/fileService";
 import multer from "multer";
@@ -24,7 +24,7 @@ const upload = multer({
 
 // Helper function to get user ID from request
 function getUserId(req: Request): string {
-  return (req.user as any).claims.sub;
+  return (req.user as any).uid;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {

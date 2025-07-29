@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import FAAELogo from "@/components/FAAELogo";
 import UserTypeSelector from "@/components/Auth/UserTypeSelector";
+import { loginWithGoogle } from "@/lib/firebase";
 import { 
   Building, 
   Calendar, 
@@ -19,11 +20,11 @@ import {
 export default function Landing() {
   const [showUserTypeSelector, setShowUserTypeSelector] = useState(false);
 
-  const handleUserTypeSelection = (userType: 'admin' | 'collaborator') => {
-    // Store the selected user type in localStorage to be used after login
+  const handleUserTypeSelection = async (userType: 'admin' | 'collaborator') => {
+    // Store the selected user type to apply after login
     localStorage.setItem('selectedUserType', userType);
-    // Redirect to login
-    window.location.href = '/api/login';
+    await loginWithGoogle();
+    window.location.reload();
   };
 
   if (showUserTypeSelector) {
@@ -225,9 +226,12 @@ export default function Landing() {
           <p className="text-xl text-gray-600 mb-8">
             Junte-se aos profissionais que já transformaram seus processos com nossa plataforma
           </p>
-          <Button 
+          <Button
             size="lg"
-            onClick={() => window.location.href = '/api/login'}
+            onClick={async () => {
+              await loginWithGoogle();
+              window.location.reload();
+            }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4"
           >
             Começar Agora
