@@ -14,6 +14,7 @@ import ProjectsManager from "@/components/Projects/ProjectsManager";
 
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
+import { loginWithGoogle } from "@/lib/firebase";
 import type { User } from "@shared/schema";
 
 type Section = 'dashboard' | 'kanban' | 'projects' | 'calendar' | 'files' | 'chat' | 'users';
@@ -37,8 +38,9 @@ export default function Home() {
         description: "Você precisa fazer login para acessar esta página.",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
+      setTimeout(async () => {
+        await loginWithGoogle();
+        window.location.reload();
       }, 500);
       return;
     }

@@ -4,6 +4,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { loginWithGoogle } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -63,8 +64,9 @@ export default function UserManagement() {
           description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
-        setTimeout(() => {
-          window.location.href = "/api/login";
+        setTimeout(async () => {
+          await loginWithGoogle();
+          window.location.reload();
         }, 500);
         return;
       }
@@ -84,8 +86,9 @@ export default function UserManagement() {
         description: "Você foi desconectado. Fazendo login novamente...",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
+      setTimeout(async () => {
+        await loginWithGoogle();
+        window.location.reload();
       }, 500);
       return;
     }

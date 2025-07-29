@@ -3,6 +3,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "./Navigation";
 import type { User } from "@shared/schema";
+import { logout } from "@/lib/firebase";
 
 interface HeaderProps {
   user: User;
@@ -21,8 +22,9 @@ export default function Header({ user, activeSection, onSectionChange }: HeaderP
 
   const unreadCount = notifications.filter((n: any) => !n.isRead).length;
 
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
+  const handleLogout = async () => {
+    await logout();
+    window.location.reload();
   };
 
   const getDisplayName = () => {
