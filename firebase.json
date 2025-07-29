@@ -1,4 +1,6 @@
 {
+  "hosting": {
+    "public": "dist/public",
   "firestore": {
     "database": "(default)",
     "location": "southamerica-east1",
@@ -13,6 +15,7 @@
       "**/node_modules/**"
     ],
     "rewrites": [
+      { "source": "**", "destination": "/index.html" }
       {
         "source": "**",
         "destination": "/index.html"
