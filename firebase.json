@@ -1,6 +1,4 @@
 {
-  "hosting": {
-    "public": "dist/public",
   "firestore": {
     "database": "(default)",
     "location": "southamerica-east1",
@@ -8,7 +6,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "public",
+    "public": "dist/public",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -16,10 +14,6 @@
     ],
     "rewrites": [
       { "source": "**", "destination": "/index.html" }
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
     ]
   }
 }
