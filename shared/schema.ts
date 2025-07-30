@@ -279,9 +279,9 @@ export type InsertTimeEntry = z.infer<typeof insertTimeEntrySchema>;
 
 // Extended types for API responses
 export type TaskWithDetails = Task & {
-  project?: Project;
-  assignedUser?: User;
-  createdUser?: User;
+  project: Project | null;
+  assignedUser: User | null;
+  createdUser?: User | null;
   comments?: TaskComment[];
   files?: File[];
   timeEntries?: TimeEntry[];
