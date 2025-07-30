@@ -43,7 +43,7 @@ export default function ProjectsManager() {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [status, setStatus] = useState<"active" | "completed" | "on_hold" | "cancelled">("active");
-  const [type, setType] = useState<"stand_imobiliario" | "projeto_arquitetonico" | "projeto_estrutural" | "reforma" | "manutencao">("stand_imobiliario");
+  const [type, setType] = useState<"stand_imobiliario" | "projeto_arquitetura" | "projeto_estrutural" | "reforma" | "manutencao">("stand_imobiliario");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [budget, setBudget] = useState("");
@@ -219,12 +219,12 @@ export default function ProjectsManager() {
     cancelled: "Cancelado"
   };
 
-  const typeLabels = {
+  const typeLabels: Record<string, string> = {
     stand_imobiliario: "Stand Imobiliário",
-    projeto_arquitetonico: "Projeto Arquitetônico",
+    projeto_arquitetura: "Projeto Arquitetônico",
     projeto_estrutural: "Projeto Estrutural",
     reforma: "Reforma",
-    manutencao: "Manutenção"
+    manutencao: "Manutenção",
   };
 
   const statusColors = {
@@ -350,7 +350,7 @@ export default function ProjectsManager() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="stand_imobiliario">Stand Imobiliário</SelectItem>
-                    <SelectItem value="projeto_arquitetonico">Projeto Arquitetônico</SelectItem>
+                    <SelectItem value="projeto_arquitetura">Projeto Arquitetônico</SelectItem>
                     <SelectItem value="projeto_estrutural">Projeto Estrutural</SelectItem>
                     <SelectItem value="reforma">Reforma</SelectItem>
                     <SelectItem value="manutencao">Manutenção</SelectItem>

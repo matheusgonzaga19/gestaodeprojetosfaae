@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-function getAuthHeaders() {
+function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('firebaseIdToken');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -17,12 +17,12 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const headers: Record<string, string> = { ...getAuthHeaders() };
+  if (data) headers["Content-Type"] = "application/json";
+
   const res = await fetch(url, {
     method,
-    headers: {
-      ...(data ? { "Content-Type": "application/json" } : {}),
-      ...getAuthHeaders(),
-    },
+    headers,
     body: data ? JSON.stringify(data) : undefined,
   });
 
@@ -37,7 +37,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const res = await fetch(queryKey[0] as string, {
-      headers: getAuthHeaders(),
+      headers: getAuthHeaders() as Record<string, string>,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

@@ -5,8 +5,18 @@ interface MetricsCardsProps {
   userStats?: UserStats;
 }
 
+interface Metric {
+  title: string;
+  value: number | string;
+  change: number | string;
+  changeType: 'positive' | 'neutral' | 'warning' | 'negative';
+  icon: string;
+  iconColor: string;
+  iconBg: string;
+}
+
 export default function MetricsCards({ stats, userStats }: MetricsCardsProps) {
-  const metrics = [
+  const metrics: Metric[] = [
     {
       title: "Tarefas Concluídas",
       value: stats?.completedTasks || 0,

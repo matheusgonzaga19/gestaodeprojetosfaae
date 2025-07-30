@@ -1,16 +1,17 @@
-import { 
-  BarChart3, 
-  Kanban, 
-  Building, 
-  Calendar, 
-  Folder, 
-  Bot, 
+import {
+  BarChart3,
+  Kanban,
+  Building,
+  Calendar,
+  Folder,
+  Bot,
   Users,
 } from 'lucide-react';
+import type { Section } from '@/types';
 
 interface MobileBottomNavProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  activeSection: Section;
+  onSectionChange: React.Dispatch<React.SetStateAction<Section>>;
   userRole: string;
 }
 
@@ -40,7 +41,7 @@ export default function MobileBottomNav({ activeSection, onSectionChange, userRo
           return (
             <button
               key={item.id}
-              onClick={() => onSectionChange(item.id)}
+              onClick={() => onSectionChange(item.id as Section)}
               className={`flex flex-col items-center justify-center px-1 py-1.5 sm:px-2 sm:py-2 min-w-0 flex-1 transition-all duration-200 rounded-lg mx-0.5 ${
                 isActive
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'

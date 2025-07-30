@@ -1,5 +1,5 @@
 import { db } from './db';
-import { users, projects, tasks, notifications } from '@shared/schema';
+import { users, projects, tasks, notifications, type InsertProject, type InsertTask } from '@shared/schema';
 
 async function seed() {
   try {
@@ -48,7 +48,7 @@ async function seed() {
         clientPhone: '(11) 77777-7777',
         createdUserId: '1'
       }
-    ]).returning();
+    ] as any).returning();
 
     console.log(`✅ Criados ${sampleProjects.length} projetos de exemplo`);
 
@@ -126,7 +126,7 @@ async function seed() {
         dueDate: '2024-11-15',
         createdUserId: '1'
       }
-    ]).returning();
+    ] as any).returning();
 
     console.log(`✅ Criadas ${sampleTasks.length} tarefas de exemplo`);
 

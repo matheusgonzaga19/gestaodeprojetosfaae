@@ -47,15 +47,15 @@ export default function Dashboard() {
     queryKey: ['/api/dashboard/user-stats'],
   });
 
-  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery<TaskWithDetails[]>({
     queryKey: ['/api/tasks'],
   });
 
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery<ProjectWithTasks[]>({
     queryKey: ['/api/projects'],
   });
 
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
   });
 
@@ -107,10 +107,10 @@ export default function Dashboard() {
 
     // Apply date range filter
     if (dateRange.from && dateRange.to) {
-      filteredTasks = filteredTasks.filter(task => {
-        const taskDate = new Date(task.createdAt);
-        return taskDate >= dateRange.from! && taskDate <= dateRange.to!;
-      });
+        filteredTasks = filteredTasks.filter(task => {
+          const taskDate = new Date(task.createdAt as any);
+          return taskDate >= dateRange.from! && taskDate <= dateRange.to!;
+        });
     }
 
     // Apply user filter
@@ -323,7 +323,10 @@ export default function Dashboard() {
                     mode="range"
                     defaultMonth={dateRange.from}
                     selected={dateRange}
-                    onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
+                      onSelect={(range) =>
+                        setDateRange(
+                          range ? { from: range.from, to: range.to ?? undefined } : { from: undefined, to: undefined }
+                        )}
                     numberOfMonths={window.innerWidth > 768 ? 2 : 1}
                   />
                 </PopoverContent>
