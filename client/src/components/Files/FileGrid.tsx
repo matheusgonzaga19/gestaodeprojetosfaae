@@ -99,7 +99,12 @@ export default function FileGrid({ files, viewMode, onFileSelect, selectedFile }
               {file.mimeType.split('/')[1]?.toUpperCase() || 'FILE'}
             </div>
             <div className="col-span-2 flex items-center text-sm text-gray-600 dark:text-gray-400">
-              {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true, locale: ptBR })}
+              {file.createdAt
+                ? formatDistanceToNow(new Date(file.createdAt), {
+                    addSuffix: true,
+                    locale: ptBR,
+                  })
+                : ""}
             </div>
             <div className="col-span-1 flex items-center">
               <button
@@ -153,7 +158,12 @@ export default function FileGrid({ files, viewMode, onFileSelect, selectedFile }
             {/* File Actions */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-400">
-                {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true, locale: ptBR })}
+                  {file.createdAt
+                    ? formatDistanceToNow(new Date(file.createdAt), {
+                        addSuffix: true,
+                        locale: ptBR,
+                      })
+                    : ""}
               </span>
               <button
                 onClick={(e) => handleDownload(file, e)}

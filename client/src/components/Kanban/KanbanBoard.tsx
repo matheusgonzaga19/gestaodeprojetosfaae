@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Calendar, Clock, User, Building, AlertCircle, CheckCircle, Pause, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { TaskWithDetails, Project, User as UserType } from "@shared/schema";
+import type { Task, TaskWithDetails, Project, User as UserType } from "@shared/schema";
 import TaskModal from "./TaskModal";
 import KanbanFilters from "./KanbanFilters";
 
@@ -107,9 +107,10 @@ export default function KanbanBoard() {
   console.log('👥 Usuários carregados:', users.length, users);
 
   // Update task status mutation
-  const updateTaskStatusMutation = useMutation({
-    mutationFn: async ({ taskId, status }: { taskId: number; status: TaskStatus }) => {
-      return await apiRequest('PUT', `/api/tasks/${taskId}`, { status });
+  const updateTaskStatusMutation = useMutation<Task, Error, { taskId: number; status: TaskStatus }>({
+    mutationFn: async ({ taskId, status }) => {
+      const res = await apiRequest('PUT', `/api/tasks/${taskId}`, { status });
+      return res.json();
     },
     onSuccess: (updatedTask) => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -154,15 +155,15 @@ export default function KanbanBoard() {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
-        const matchesSearch = 
-          task.title.toLowerCase().includes(searchLower) ||
-          task.description?.toLowerCase().includes(searchLower) ||
-          getProjectName(task.projectId).toLowerCase().includes(searchLower);
+          const matchesSearch =
+            task.title.toLowerCase().includes(searchLower) ||
+            task.description?.toLowerCase().includes(searchLower) ||
+            (task.projectId ? getProjectName(task.projectId).toLowerCase().includes(searchLower) : false);
         if (!matchesSearch) return false;
       }
 
       // Project filter
-      if (filters.projectId && task.projectId.toString() !== filters.projectId) {
+      if (filters.projectId && task.projectId?.toString() !== filters.projectId) {
         return false;
       }
 
@@ -427,8 +428,8 @@ export default function KanbanBoard() {
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="w-3 h-3" />
                           <span>
-                            {task.actualHours?.toFixed(1) || '0.0'}h
-                            {task.estimatedHours && ` / ${task.estimatedHours.toFixed(1)}h`}
+                            {Number(task.actualHours ?? 0).toFixed(1)}h
+                            {task.estimatedHours && ` / ${Number(task.estimatedHours).toFixed(1)}h`}
                           </span>
                         </div>
                       )}
@@ -437,13 +438,13 @@ export default function KanbanBoard() {
                       {task.assignedUserId && (
                         <div className="flex items-center gap-2 mt-2">
                           <Avatar className="w-5 h-5">
-                            <AvatarImage src={users.find(u => u.id === task.assignedUserId)?.profileImageUrl} />
+                            <AvatarImage src={users.find(u => u.id === task.assignedUserId)?.profileImageUrl ?? undefined} />
                             <AvatarFallback className="text-xs">
-                              {getUserDisplayName(task.assignedUserId).substring(0, 2).toUpperCase()}
+                              {getUserDisplayName(task.assignedUserId ?? '').substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                            {getUserDisplayName(task.assignedUserId)}
+                            {getUserDisplayName(task.assignedUserId ?? '')}
                           </span>
                         </div>
                       )}

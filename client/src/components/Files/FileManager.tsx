@@ -345,7 +345,9 @@ export default function FileManager() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{file.originalName}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {new Date(file.createdAt).toLocaleDateString('pt-BR')}
+                        {file.createdAt
+                          ? new Date(file.createdAt).toLocaleDateString('pt-BR')
+                          : ''}
                       </p>
                     </div>
                   </div>

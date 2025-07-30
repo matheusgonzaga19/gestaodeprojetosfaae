@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTheme } from "@/hooks/useTheme";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "./Navigation";
-import type { User } from "@shared/schema";
+import type { User, Notification } from "@shared/schema";
 import { logout } from "@/lib/firebase";
 import type { Section } from "@/types";
 
@@ -16,7 +16,7 @@ export default function Header({ user, activeSection, onSectionChange }: HeaderP
   const { theme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ['/api/notifications'],
     refetchInterval: 30000, // Refresh every 30 seconds
   });

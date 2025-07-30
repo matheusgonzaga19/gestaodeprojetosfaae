@@ -99,7 +99,12 @@ export default function FilePreview({ file }: FilePreviewProps) {
           <div className="flex justify-between">
             <span className="text-gray-500 dark:text-gray-400">Criado:</span>
             <span className="font-medium">
-              {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true, locale: ptBR })}
+                {file.createdAt
+                  ? formatDistanceToNow(new Date(file.createdAt), {
+                      addSuffix: true,
+                      locale: ptBR,
+                    })
+                  : ""}
             </span>
           </div>
         </div>

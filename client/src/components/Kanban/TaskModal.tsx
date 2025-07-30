@@ -25,7 +25,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trash2, Save, X } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { TaskWithDetails, User, Project } from "@shared/schema";
+import type { TaskWithDetails, User, Project, Task } from "@shared/schema";
+
+type Priority = "baixa" | "media" | "alta" | "critica";
+type TaskStatus = "aberta" | "em_andamento" | "concluida" | "cancelada";
 
 interface TaskModalProps {
   task?: TaskWithDetails | null;
@@ -70,10 +73,11 @@ export default function TaskModal({
   });
 
   // Create task mutation
-  const createTaskMutation = useMutation({
+  const createTaskMutation = useMutation<Task, Error, any>({
     mutationFn: async (data: any) => {
       console.log("📤 Criando tarefa:", data);
-      return await apiRequest('POST', '/api/tasks', data);
+      const res = await apiRequest('POST', '/api/tasks', data);
+      return res.json();
     },
     onSuccess: (newTask) => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -98,10 +102,11 @@ export default function TaskModal({
   });
 
   // Update task mutation
-  const updateTaskMutation = useMutation({
+  const updateTaskMutation = useMutation<Task, Error, any>({
     mutationFn: async (data: any) => {
       console.log("📤 Atualizando tarefa:", data);
-      return await apiRequest('PUT', `/api/tasks/${task?.id}`, data);
+      const res = await apiRequest('PUT', `/api/tasks/${task?.id}`, data);
+      return res.json();
     },
     onSuccess: (updatedTask) => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -126,9 +131,9 @@ export default function TaskModal({
   });
 
   // Delete task mutation
-  const deleteTaskMutation = useMutation({
+  const deleteTaskMutation = useMutation<Response, Error, void>({
     mutationFn: async () => {
-      return await apiRequest('DELETE', `/api/tasks/${task?.id}`);
+      return apiRequest('DELETE', `/api/tasks/${task?.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
@@ -299,7 +304,7 @@ export default function TaskModal({
           {/* Priority */}
           <div className="space-y-2">
             <Label htmlFor="priority">Prioridade</Label>
-            <Select value={priority} onValueChange={setPriority}>
+            <Select value={priority} onValueChange={(v) => setPriority(v as Priority)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a prioridade" />
               </SelectTrigger>
@@ -315,7 +320,7 @@ export default function TaskModal({
           {/* Status */}
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(v) => setStatus(v as TaskStatus)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>

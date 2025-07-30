@@ -13,9 +13,11 @@ import {
   Menu 
 } from 'lucide-react';
 
+import type { Section } from '@/types';
+
 interface NavigationProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  activeSection: Section;
+  onSectionChange: (section: Section) => void;
   userRole: string;
 }
 
@@ -36,7 +38,7 @@ export default function Navigation({ activeSection, onSectionChange, userRole }:
     navItems.push({ id: 'users', label: 'Usuários', icon: Users });
   }
 
-  const handleNavigation = (section: string) => {
+  const handleNavigation = (section: Section) => {
     onSectionChange(section);
     setIsOpen(false);
   };
@@ -50,7 +52,7 @@ export default function Navigation({ activeSection, onSectionChange, userRole }:
           return (
             <button
               key={item.id}
-              onClick={() => onSectionChange(item.id)}
+              onClick={() => onSectionChange(item.id as Section)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 ${
                 activeSection === item.id
                   ? 'bg-blue-600 text-white'
@@ -84,7 +86,7 @@ export default function Navigation({ activeSection, onSectionChange, userRole }:
                   return (
                     <button
                       key={item.id}
-                      onClick={() => handleNavigation(item.id)}
+                      onClick={() => handleNavigation(item.id as Section)}
                       className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg font-medium transition-colors ${
                         activeSection === item.id
                           ? 'bg-blue-600 text-white'
