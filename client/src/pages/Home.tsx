@@ -16,8 +16,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { useUserTypeSetup } from "@/hooks/useUserTypeSetup";
 import { loginWithGoogle } from "@/lib/firebase";
 import type { User } from "@shared/schema";
-
-type Section = 'dashboard' | 'kanban' | 'projects' | 'calendar' | 'files' | 'chat' | 'users';
+import type { Section } from "@/types";
 
 export default function Home() {
   const { user, isAuthenticated, isLoading } = useAuth();

@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,14 +33,16 @@ interface TaskModalProps {
   onOpenChange?: (open: boolean) => void;
   defaultStatus?: string;
   defaultProjectId?: number;
+  trigger?: React.ReactNode;
 }
 
-export default function TaskModal({ 
-  task, 
-  open = false, 
-  onOpenChange, 
+export default function TaskModal({
+  task,
+  open = false,
+  onOpenChange,
   defaultStatus = "aberta",
-  defaultProjectId 
+  defaultProjectId,
+  trigger,
 }: TaskModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -246,6 +249,7 @@ export default function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">

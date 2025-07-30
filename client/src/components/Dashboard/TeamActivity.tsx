@@ -42,8 +42,10 @@ export default function TeamActivity() {
       });
 
     // Get recently created tasks
-    tasks
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      tasks
+        .sort(
+          (a, b) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime(),
+        )
       .slice(0, 10)
       .forEach(task => {
         const user = users.find(u => u.id === task.createdUserId);
@@ -53,7 +55,7 @@ export default function TeamActivity() {
             user,
             action: 'criou a tarefa',
             target: task.title,
-            timestamp: new Date(task.createdAt),
+              timestamp: new Date(task.createdAt as any),
             type: 'task_created',
           });
         }
@@ -149,3 +151,4 @@ export default function TeamActivity() {
     </div>
   );
 }
+

@@ -161,7 +161,7 @@ function ProjectModal({ project, trigger }: ProjectModalProps) {
 
             <div>
               <Label htmlFor="type">Tipo de Projeto</Label>
-              <Select value={formData.type} onValueChange={(value: "stand_imobiliario" | "projeto_arquitetonico" | "projeto_estrutural" | "reforma" | "manutencao") => setFormData({ ...formData, type: value })}>
+                <Select value={formData.type} onValueChange={(value: "stand_imobiliario" | "projeto_arquitetura" | "projeto_estrutural" | "reforma" | "manutencao") => setFormData({ ...formData, type: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

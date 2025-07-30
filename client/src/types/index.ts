@@ -1,14 +1,16 @@
-export type { 
-  User, 
-  Task, 
-  Project, 
-  TaskWithDetails, 
-  ProjectWithTasks, 
+export type {
+  User,
+  Task,
+  Project,
+  TaskWithDetails,
+  ProjectWithTasks,
   UserWithStats,
   File,
   Notification,
   TimeEntry,
 } from "@shared/schema";
+
+import type { TaskWithDetails } from "@shared/schema";
 
 export interface DashboardStats {
   totalTasks: number;
@@ -54,3 +56,12 @@ export interface FilePreview {
   isCAD: boolean;
   thumbnail?: string;
 }
+
+export type Section =
+  | 'dashboard'
+  | 'kanban'
+  | 'projects'
+  | 'calendar'
+  | 'files'
+  | 'chat'
+  | 'users';

@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import Navigation from "./Navigation";
 import type { User } from "@shared/schema";
 import { logout } from "@/lib/firebase";
+import type { Section } from "@/types";
 
 interface HeaderProps {
   user: User;
-  activeSection: string;
-  onSectionChange: (section: any) => void;
+  activeSection: Section;
+  onSectionChange: React.Dispatch<React.SetStateAction<Section>>;
 }
 
 export default function Header({ user, activeSection, onSectionChange }: HeaderProps) {
