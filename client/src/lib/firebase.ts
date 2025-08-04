@@ -1,11 +1,28 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onIdTokenChanged } from 'firebase/auth';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onIdTokenChanged,
+} from 'firebase/auth';
+
+function requiredEnv(key: keyof ImportMetaEnv) {
+  const value = import.meta.env[key];
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+  return value;
+}
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: requiredEnv('FIREBASE_API_KEY'),
+  authDomain: requiredEnv('FIREBASE_AUTH_DOMAIN'),
+  projectId: requiredEnv('FIREBASE_AUTH_DOMAIN'),
+  storageBucket: requiredEnv('FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+  appId: requiredEnv('FIREBASE_APP_ID'),
+  measurementId: requiredEnv('FIREBASE_MEASUREMENT_ID'),
 };
 
 const app = initializeApp(firebaseConfig);
